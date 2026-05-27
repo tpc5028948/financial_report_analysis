@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testHealth()">Test Health API</button>
+    <button onclick="testAnalyze()">Test Analyze API</button>
+    <div id="result"></div>
+
+    <script>
+        function testHealth() {
+            document.getElementById('result').innerHTML = 'Testing...';
+            fetch('http://localhost:5000/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                });
+        }
+
+        function testAnalyze() {
+            document.getElementById('result').innerHTML = 'Testing...';
+            fetch('http://localhost:5000/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "公司名称": "测试公司",
+                    "行业分类": "制造业",
+                    "财务指标": {
+                        "营业收入": 10000,
+                        "净利润": 1000,
+                        "总资产": 50000,
+                        "总负债": 20000,
+                        "流动资产": 30000,
+                        "流动负债": 15000,
+                        "股东权益": 30000,
+                        "经营现金流": 1500
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

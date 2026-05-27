@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业信用评估模型 - 启动助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-left: 4px solid #667eea;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .step-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .step-content {
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .btn-green:hover {
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.4);
+        }
+        
+        .buttons {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #856404;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .success-box p {
+            color: #155724;
+        }
+        
+        .check-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+        
+        .status-indicator.online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+        
+        .status-text {
+            font-weight: bold;
+        }
+        
+        .file-list {
+            margin: 15px 0;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-item:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 企业信用评估模型</h1>
+            <p>简单几步，启动系统</p>
+        </div>
+        
+        <div class="content">
+            <div class="step">
+                <span class="step-number">1</span>
+                <span class="step-title">检查后端服务状态</span>
+                <div class="step-content">
+                    <p>点击下方按钮检查后端服务是否正在运行：</p>
+                    
+                    <div class="check-status">
+                        <div class="status-indicator" id="statusIndicator"></div>
+                        <span class="status-text" id="statusText">检查中...</span>
+                    </div>
+                    
+                    <button class="btn" onclick="checkService()">🔄 检查服务状态</button>
+                    <button class="btn btn-green" onclick="openHealthPage()">🌐 打开健康检查</button>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <span class="step-title">启动后端服务</span>
+                <div class="step-content">
+                    <p>如果服务没有运行，请使用以下方法之一启动：</p>
+                    
+                    <div class="file-list">
+                        <div class="file-item" onclick="showTip('bat')">
+                            <span class="file-icon">📦</span>
+                            <span><strong>启动服务.bat</strong> - 双击运行（推荐）</span>
+                        </div>
+                        <div class="file-item" onclick="showTip('python')">
+                            <span class="file-icon">🐍</span>
+                            <span><strong>直接启动.py</strong> - Python启动</span>
+                        </div>
+                        <div class="file-item" onclick="showTip('manual')">
+                            <span class="file-icon">💻</span>
+                            <span><strong>手动启动</strong> - 命令行方式</span>
+                        </div>
+                    </div>
+                    
+                    <div id="tipContent"></div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-title">使用系统</span>
+                <div class="step-content">
+                    <p>后端服务启动后，点击下方按钮进入系统：</p>
+                    
+                    <div class="buttons">
+                        <button class="btn btn-green" onclick="openMainApp()">🚀 进入企业信用评估系统</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="success-box">
+                <h4>✅ 已完成的改进</h4>
+                <p><strong>修复 "Failed to fetch" 错误：</strong>统一前后端端口为8000</p>
+                <p><strong>增强文件解析：</strong>支持Excel/PDF智能识别</p>
+                <p><strong>完善财务指标：</strong>ROE、ROA、市盈率等自动计算</p>
+                <p><strong>优化PDF导出：</strong>直接生成结构化报告</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>💡 服务信息</h4>
+                <p><strong>后端地址：</strong>http://localhost:8000</p>
+                <p><strong>健康检查：</strong>http://localhost:8000/api/health</p>
+                <p><strong>前端页面：</strong>frontend/index.html</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let serviceStatus = 'checking';
+        
+        function checkService() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = 'status-indicator';
+            statusText.textContent = '检查中...';
+            statusText.style.color = '#ffc107';
+            
+            fetch('http://localhost:8000/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        indicator.className = 'status-indicator online';
+                        statusText.textContent = '✅ 后端服务运行正常！';
+                        statusText.style.color = '#28a745';
+                    } else {
+                        indicator.className = 'status-indicator';
+                        statusText.textContent = '⚠️ 服务状态异常';
+                        statusText.style.color = '#ffc107';
+                    }
+                })
+                .catch(error => {
+                    indicator.className = 'status-indicator';
+                    statusText.textContent = '❌ 后端服务未运行，请先启动服务';
+                    statusText.style.color = '#dc3545';
+                    console.error('检查失败:', error);
+                });
+        }
+        
+        function openHealthPage() {
+            window.open('http://localhost:8000/api/health', '_blank');
+        }
+        
+        function openMainApp() {
+            window.open('frontend/index.html', '_blank');
+        }
+        
+        function showTip(type) {
+            const tipContent = document.getElementById('tipContent');
+            let html = '';
+            
+            if (type === 'bat') {
+                html = `
+                    <div class="info-box">
+                        <h4>📦 使用批处理文件启动</h4>
+                        <p>1. 在文件管理器中找到 <strong>启动服务.bat</strong></p>
+                        <p>2. 双击运行该文件</p>
+                        <p>3. 等待看到 "Running on http://0.0.0.0:8000"</p>
+                        <p>4. 保持窗口打开，不要关闭</p>
+                        <p>5. 然后返回这里点击"进入企业信用评估系统"</p>
+                    </div>
+                `;
+            } else if (type === 'python') {
+                html = `
+                    <div class="info-box">
+                        <h4>🐍 使用Python启动</h4>
+                        <p>1. 打开命令提示符（CMD）或PowerShell</p>
+                        <p>2. 进入项目目录：</p>
+                        <div class="code-block">cd C:\Users\Administrator\Documents\trae_projects\financial_report_analysis</div>
+                        <p>3. 运行：</p>
+                        <div class="code-block">C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe 直接启动.py</div>
+                        <p>4. 等待看到服务启动信息</p>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div class="info-box">
+                        <h4>💻 手动启动服务</h4>
+                        <p>按以下步骤操作：</p>
+                        <div class="code-block">
+cd C:\Users\Administrator\Documents\trae_projects\financial_report_analysis
+set PYTHONPATH=%CD%\backend
+C:\Users\Administrator\AppData\Local\Programs\Python\Python312\python.exe backend/api/app.py
+                        </div>
+                    </div>
+                `;
+            }
+            
+            tipContent.innerHTML = html;
+        }
+        
+        // 页面加载时自动检查服务状态
+        window.onload = function() {
+            checkService();
+        };
+    </script>
+</body>
+</html>

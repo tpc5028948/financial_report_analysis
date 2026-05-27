@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI产品经理 - 个人作品集</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        .skill-tag {
+            background: rgba(102, 126, 234, 0.15);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        .skill-tag:hover {
+            background: rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .animate-pulse-slow {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-top: 8px;
+            border-radius: 2px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: -1.15rem;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% + 1rem);
+            background: rgba(102, 126, 234, 0.3);
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-lg border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                        <i class="fa fa-rocket text-white"></i>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">AI产品经理</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#about" class="text-gray-300 hover:text-white transition-colors">关于我</a>
+                    <a href="#experience" class="text-gray-300 hover:text-white transition-colors">工作经历</a>
+                    <a href="#projects" class="text-gray-300 hover:text-white transition-colors">项目作品</a>
+                    <a href="#skills" class="text-gray-300 hover:text-white transition-colors">技能栈</a>
+                    <a href="#contact" class="text-gray-300 hover:text-white transition-colors">联系方式</a>
+                </div>
+                <button class="md:hidden text-gray-300 hover:text-white" onclick="toggleMenu()">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-black/50 backdrop-blur-lg border-t border-white/10">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#about" class="block text-gray-300 hover:text-white transition-colors">关于我</a>
+                <a href="#experience" class="block text-gray-300 hover:text-white transition-colors">工作经历</a>
+                <a href="#projects" class="block text-gray-300 hover:text-white transition-colors">项目作品</a>
+                <a href="#skills" class="block text-gray-300 hover:text-white transition-colors">技能栈</a>
+                <a href="#contact" class="block text-gray-300 hover:text-white transition-colors">联系方式</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="min-h-screen flex items-center justify-center px-4 pt-16">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="relative inline-block mb-8">
+                <div class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 p-1 animate-float">
+                    <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                        <i class="fa fa-user-circle-o text-6xl text-white"></i>
+                    </div>
+                </div>
+                <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-green-500 border-4 border-[#0f0c29] flex items-center justify-center animate-pulse-slow">
+                    <i class="fa fa-check text-white text-sm"></i>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">
+                <span class="text-gradient">AI产品经理</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 mb-6">
+                将技术能力与产品思维融合，打造智能化解决方案
+            </p>
+            <p class="text-gray-400 max-w-2xl mx-auto mb-8">
+                专注于AI驱动的金融科技产品设计与开发，擅长从用户需求出发，结合机器学习技术，创造有价值的产品体验
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#projects" class="btn-gradient px-8 py-3 rounded-lg font-medium text-white inline-flex items-center justify-center">
+                    <i class="fa fa-briefcase mr-2"></i>查看项目
+                </a>
+                <a href="#contact" class="border border-white/30 px-8 py-3 rounded-lg font-medium text-white hover:bg-white/10 transition-colors inline-flex items-center justify-center">
+                    <i class="fa fa-envelope mr-2"></i>联系我
+                </a>
+            </div>
+            <div class="flex justify-center space-x-6 mt-12">
+                <a href="https://github.com" target="_blank" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <i class="fa fa-github text-xl"></i>
+                </a>
+                <a href="https://linkedin.com" target="_blank" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <i class="fa fa-linkedin text-xl"></i>
+                </a>
+                <a href="https://twitter.com" target="_blank" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <i class="fa fa-twitter text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-title">关于我</h2>
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6 text-gradient">产品思维与技术能力</h3>
+                    <p class="text-gray-300 mb-6 leading-relaxed">
+                        作为一名AI产品经理，我具备从0到1打造智能产品的全流程能力。我相信优秀的AI产品不仅需要强大的技术支撑，更需要深入理解用户需求和业务场景。
+                    </p>
+                    <p class="text-gray-300 mb-8 leading-relaxed">
+                        我的核心优势在于能够将复杂的机器学习技术转化为用户友好的产品功能，同时具备足够的技术背景来与研发团队有效沟通。
+                    </p>
+                    
+                    <h4 class="text-xl font-semibold mb-4">🎓 教育背景</h4>
+                    <div class="space-y-4 mb-8">
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-bold text-lg">中国社会科学院大学</div>
+                                    <div class="text-purple-400">数字经济 · 硕士</div>
+                                    <div class="text-gray-400 text-sm">GPA: 3.95/5.0 (TOP 5%)</div>
+                                </div>
+                                <div class="text-gray-500 text-sm">2025.09 - 2027.07</div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-bold text-lg">安徽大学（211/双一流）</div>
+                                    <div class="text-purple-400">互联网金融 · 学士</div>
+                                    <div class="text-gray-400 text-sm">GPA: 3.85/4.0 (TOP 3%)</div>
+                                </div>
+                                <div class="text-gray-500 text-sm">2020.09 - 2024.07</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-gradient-to-br from-purple-500/20 to-indigo-600/20 rounded-2xl p-8 border border-white/10 mb-8">
+                        <h4 class="text-xl font-semibold mb-6">核心能力框架</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                    <i class="fa fa-lightbulb-o text-purple-400"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">用户洞察</div>
+                                    <div class="text-gray-400 text-sm">深度理解用户需求与痛点</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <i class="fa fa-line-chart text-blue-400"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">数据分析</div>
+                                    <div class="text-gray-400 text-sm">用数据驱动产品决策</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                    <i class="fa fa-cogs text-green-400"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">技术理解</div>
+                                    <div class="text-gray-400 text-sm">理解AI技术边界与可能性</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                                    <i class="fa fa-users text-orange-400"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">团队协作</div>
+                                    <div class="text-gray-400 text-sm">带领团队高效交付</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
+                            <div class="text-3xl font-bold text-gradient mb-2">3+</div>
+                            <div class="text-gray-400 text-sm">年AI产品经验</div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
+                            <div class="text-3xl font-bold text-gradient mb-2">5+</div>
+                            <div class="text-gray-400 text-sm">AI项目交付</div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
+                            <div class="text-3xl font-bold text-gradient mb-2">3</div>
+                            <div class="text-gray-400 text-sm">核心产品设计</div>
+                        </div>
+                        <div class="bg-white/5 rounded-lg p-4 border border-white/10 text-center">
+                            <div class="text-3xl font-bold text-gradient mb-2">2</div>
+                            <div class="text-gray-400 text-sm">金融科技产品</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-20 px-4 bg-black/20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-title">工作经历</h2>
+            <div class="ml-8 space-y-8">
+                <div class="relative timeline-item pl-4">
+                    <div class="bg-white/5 rounded-xl p-6 border border-white/10 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="font-bold text-xl">科大讯飞</div>
+                                <div class="text-purple-400 text-lg">AI产品经理实习生</div>
+                            </div>
+                            <div class="text-gray-500 text-sm">2024.03 - 2024.07</div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>竞品分析驱动策略</strong>：构建功能矩阵、技术路线、用户体验三维分析框架，解决产品差异化缺失的问题，对10+款AI竞品深度分析，每周产出竞品报告，提炼20+条关键洞察支撑策略，指导产品差异化发展并驱动产品迭代更新。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>AI产品专项测试与验收</strong>：协助建立覆盖模型边界case、幻觉检测、多轮对话质量评估的测试体系。典型闭环：①发现南方方言口音语音识别准确率偏差18%→定位训练数据方言样本不足→推动补采2000+条方言样本并调整评分策略→偏差率降至5%以下；②发现多轮对话上下文丢失→定位Prompt链路设计缺陷→重构上下文传递机制→评测一致性提升23%。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>数据驱动效果迭代</strong>：参与AI测试评估平台核心指标搭建，覆盖响应时长、任务完成率、用户满意度等12项维度；通过37次迭代实验，将关键路径转化率提升至89.6%，NPS值提升14.2分，确保每项优化均可量化的正向反馈。</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">AI产品</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">竞品分析</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">Prompt工程</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">数据驱动</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative timeline-item pl-4">
+                    <div class="bg-white/5 rounded-xl p-6 border border-white/10 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="font-bold text-xl">北京中科闻歌科技有限公司</div>
+                                <div class="text-purple-400 text-lg">AI投研产品实习生</div>
+                            </div>
+                            <div class="text-gray-500 text-sm">2026.04 - 2026.05</div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>Claworks智能研报生成模块</strong>：主导模块产品定义与需求拆解，构建用户画像并运用Kano模型排序需求优先级，完成PRD撰写并推动2轮需求评审确定MVP方案，模块上线后支持研报团队日常研报生成。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>AI产品数据中台建设</strong>：设计数据方案并搭建ETL流程，完成10万+条多源数据清洗与结构化，结合金融领域知识构建特征体系与Prompt调优策略，为模型精度提升奠定基础。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>AI投研模型迭代优化</strong>：构建模型效果评估指标体系，经多轮A/B对比与参数调优使分析精度提升12%，主导上线前效果验收与灰度测试，推动AI+金融投研场景落地。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>投研产业研究与产品推广</strong>：基于对300+份金融研报的深度解析，独立撰写5篇产业研究报告，成功推动2个核心功能模块进入需求立项阶段，直接支撑了AI投研产品的功能规划；AI投研助手原型：搭建工作流并通过Coze+Claude产出可交互的投研问答Web原型，实现研报智能摘要与多轮追问，验证核心交互逻辑后交由开发团队正式实现，缩短需求验证周期约60%。</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">AI投研</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">金融科技</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">数据中台</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">A/B测试</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative timeline-item pl-4">
+                    <div class="bg-white/5 rounded-xl p-6 border border-white/10 card-hover">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="font-bold text-xl">天弘基金</div>
+                                <div class="text-purple-400 text-lg">金融产品实习生</div>
+                            </div>
+                            <div class="text-gray-500 text-sm">2025.12 - 2026.03</div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>数据驱动产品决策</strong>：通过对10+种竞品基金的收益率、资金流向等多维度数据分析，提炼出30+组关键洞察，直接用于优化产品定位和费率结构，为产品定位与费率结构优化提供支撑。</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                <p class="text-gray-300"><strong>产品全周期管理</strong>：推动基金产品全生命周期管理（新发—建仓期—持续营销），主导银行/券商/互联网平台渠道对接与监管审查，协调上线准备保障按时发行；上线后持续监测AUM、申赎数据、七日年化等指标，形成可持续运营监控和产品优化迭代。</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">金融产品</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">数据分析</span>
+                            <span class="skill-tag px-3 py-1 rounded-full text-sm">产品管理</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-title">项目作品</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('ai-research')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-brain text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">AI投研助手</h3>
+                    <p class="text-gray-400 mb-4">基于机器学习的企业信用评估系统，通过多维度数据分析为投资决策提供智能支持</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">机器学习</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">金融分析</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">数据可视化</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">中科闻歌 · 2026</span>
+                        <a href="#" onclick="openProject('ai-research'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('credit-assessment')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-bar-chart text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">信用评估项目</h3>
+                    <p class="text-gray-400 mb-4">互联网+银贷信用评估产品，模型准确率提升20%，推动模型从研究验证到产品化</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">信用评估</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">机器学习</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">金融科技</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">芯晨科技 · 2024</span>
+                        <a href="#" onclick="openProject('credit-assessment'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('financial-data')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-green-600 to-teal-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-calculator text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">财务数据管理系统</h3>
+                    <p class="text-gray-400 mb-4">基于SAP系统构建的财务指标监控面板，推动后勤统计从实时预警模式化转变</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">财务数据</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">数据可视化</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">风险预警</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">中建五局 · 2025</span>
+                        <a href="#" onclick="openProject('financial-data'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('ai-assistant')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-orange-600 to-red-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-comments text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">AI智能助手</h3>
+                    <p class="text-gray-400 mb-4">科大讯飞AI产品，语音识别准确率优化，多轮对话一致性提升23%</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">语音识别</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">对话系统</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">Prompt工程</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">科大讯飞 · 2024</span>
+                        <a href="#" onclick="openProject('ai-assistant'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('claworks')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-pink-600 to-purple-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-file-text-o text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Claworks智能研报生成</h3>
+                    <p class="text-gray-400 mb-4">基于AI的智能研报生成工具，支持多源数据解析与结构化，提升研报生成效率</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">智能生成</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">研报分析</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">数据中台</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">中科闻歌 · 2026</span>
+                        <a href="#" onclick="openProject('claworks'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="project-card rounded-xl p-6 card-hover" onclick="openProject('finance-tools')">
+                    <div class="w-full h-40 rounded-lg bg-gradient-to-br from-cyan-600 to-blue-600 mb-6 flex items-center justify-center">
+                        <i class="fa fa-wrench text-6xl text-white/80"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">财务数字化工具</h3>
+                    <p class="text-gray-400 mb-4">AI财务工具落地应用，将税务核算、费用对账等高频操作固化为可复用流程</p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">RPA</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">数字化转型</span>
+                        <span class="skill-tag px-3 py-1 rounded-full text-sm">效率提升</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500 text-sm">中建五局 · 2025</span>
+                        <a href="#" onclick="openProject('finance-tools'); return false;" class="text-purple-400 hover:text-purple-300 flex items-center">
+                            查看详情 <i class="fa fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-title">技能栈</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-6 text-gradient">产品能力</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">用户研究与需求分析</span>
+                                <span class="text-purple-400">95%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">AI产品设计与规划</span>
+                                <span class="text-purple-400">92%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">数据分析与驱动</span>
+                                <span class="text-purple-400">90%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">金融科技产品</span>
+                                <span class="text-purple-400">88%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">项目管理</span>
+                                <span class="text-purple-400">85%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-6 text-gradient">技术能力</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">机器学习</span>
+                                <span class="text-blue-400">85%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">Python / Pandas</span>
+                                <span class="text-blue-400">82%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 82%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">数据可视化</span>
+                                <span class="text-blue-400">80%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">SQL</span>
+                                <span class="text-blue-400">78%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 78%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-300">前端开发</span>
+                                <span class="text-blue-400">70%</span>
+                            </div>
+                            <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12">
+                <h3 class="text-xl font-semibold mb-6 text-center text-gradient">技术工具</h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span class="skill-tag px-4 py-2 rounded-full">Scikit-learn</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">XGBoost</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Pandas</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">NumPy</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Flask</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">FastAPI</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Coze</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Claude API</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Figma</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Axure</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Chart.js</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Tableau</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Git</span>
+                    <span class="skill-tag px-4 py-2 rounded-full">Jupyter</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center section-title">联系方式</h2>
+            <div class="bg-white/5 rounded-xl p-8 border border-white/10">
+                <p class="text-gray-300 text-center mb-8">
+                    我正在寻找新的机会，欢迎与我联系交流AI产品相关的话题
+                </p>
+                <div class="grid md:grid-cols-3 gap-6 mb-8">
+                    <div class="text-center">
+                        <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-envelope text-xl text-purple-400"></i>
+                        </div>
+                        <div class="text-gray-400 text-sm mb-2">邮箱</div>
+                        <div class="font-medium">contact@example.com</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-phone text-xl text-blue-400"></i>
+                        </div>
+                        <div class="text-gray-400 text-sm mb-2">电话</div>
+                        <div class="font-medium">+86 138-0000-0000</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-map-marker text-xl text-green-400"></i>
+                        </div>
+                        <div class="text-gray-400 text-sm mb-2">地点</div>
+                        <div class="font-medium">北京</div>
+                    </div>
+                </div>
+                <form id="contact-form" class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <input type="text" placeholder="您的姓名" class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-purple-500 text-white placeholder-gray-500">
+                        <input type="email" placeholder="电子邮箱" class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-purple-500 text-white placeholder-gray-500">
+                    </div>
+                    <input type="text" placeholder="主题" class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-purple-500 text-white placeholder-gray-500">
+                    <textarea placeholder="留言内容" rows="4" class="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:border-purple-500 text-white placeholder-gray-500 resize-none"></textarea>
+                    <button type="submit" class="btn-gradient w-full py-3 rounded-lg font-medium text-white">
+                        发送消息
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-8 px-4 border-t border-white/10">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-github text-xl"></i>
+                </a>
+                <a href="https://linkedin.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-linkedin text-xl"></i>
+                </a>
+                <a href="https://twitter.com" target="_blank" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-twitter text-xl"></i>
+                </a>
+            </div>
+            <p class="text-gray-500 text-sm">© 2024 AI产品经理. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="project-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-gradient-to-br from-[#1a1630] to-[#0f0c29] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-br from-[#1a1630] to-[#0f0c29] p-6 border-b border-white/10 flex justify-between items-center">
+                <h2 id="modal-title" class="text-2xl font-bold"></h2>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div id="modal-content" class="p-6"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function openProject(projectId) {
+            const modal = document.getElementById('project-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+
+            const projects = {
+                'ai-research': {
+                    title: 'AI投研助手',
+                    content: `
+                        <div class="mb-6">
+                            <div class="w-full h-64 rounded-xl bg-gradient-to-br from-purple-600/30 to-indigo-600/30 mb-6 flex items-center justify-center">
+                                <i class="fa fa-brain text-8xl text-white/60"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">项目概述</h3>
+                            <p class="text-gray-400 mb-6">
+                                AI投研助手是一款基于机器学习的企业信用评估系统，旨在为投资者和金融机构提供准确、高效的企业信用风险评估服务。基于对300+份金融研报的深度解析，构建智能投研问答系统。
+                            </p>
+                            
+                            <h3 class="text-xl font-semibold mb-4">产品设计思路</h3>
+                            <div class="space-y-3 mb-6">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa fa-lightbulb-o text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">用户痛点分析</div>
+                                        <div class="text-gray-400 text-sm">传统投研依赖人工分析，效率低且主观性强，难以满足大规模企业评估需求</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa fa-target text-blue-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">核心目标</div>
+                                        <div class="text-gray-400 text-sm">利用机器学习技术实现自动化信用评估，提高评估准确性和效率</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa fa-users text-green-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">目标用户</div>
+                                        <div class="text-gray-400 text-sm">金融机构风控部门、投资机构、企业信用管理人员</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">核心成果</h3>
+                            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <div class="text-sm text-gray-400 mb-2">产品成果</div>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>独立撰写5篇产业研究报告</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>推动2个核心功能模块进入需求立项</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>可交互的投研问答Web原型</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-4">
+                                    <div class="text-sm text-gray-400 mb-2">技术成果</div>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>分析精度提升12%</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>需求验证周期缩短约60%</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="fa fa-check-circle text-green-400 mt-1"></i>
+                                            <span>Coze+Claude集成方案落地</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">核心功能</h3>
+                            <ul class="space-y-2 mb-6">
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>多维度财务指标分析（偿债能力、盈利能力、营运能力、成长能力）</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>行业数据对比分析与排名</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>机器学习模型信用评分（0-100分）</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>智能研报摘要与多轮追问</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>可视化评估报告生成与导出</span>
+                                </li>
+                            </ul>
+
+                            <h3 class="text-xl font-semibold mb-4">产品亮点</h3>
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-gradient mb-2">12%</div>
+                                    <div class="text-gray-400 text-sm">分析精度提升</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-blue-400 mb-2">60%</div>
+                                    <div class="text-gray-400 text-sm">周期缩短</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-green-400 mb-2">300+</div>
+                                    <div class="text-gray-400 text-sm">研报解析</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 flex gap-4">
+                                <a href="frontend/index.html" target="_blank" class="btn-gradient px-6 py-2 rounded-lg font-medium text-white inline-flex items-center">
+                                    <i class="fa fa-external-link mr-2"></i>在线演示
+                                </a>
+                                <a href="#" class="border border-white/30 px-6 py-2 rounded-lg font-medium text-white hover:bg-white/10 transition-colors inline-flex items-center">
+                                    <i class="fa fa-github mr-2"></i>源代码
+                                </a>
+                            </div>
+                        </div>
+                    `
+                },
+                'credit-assessment': {
+                    title: '信用评估项目（互联网+银贷）',
+                    content: `
+                        <div class="mb-6">
+                            <div class="w-full h-64 rounded-xl bg-gradient-to-br from-blue-600/30 to-cyan-600/30 mb-6 flex items-center justify-center">
+                                <i class="fa fa-bar-chart text-8xl text-white/60"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">项目概述</h3>
+                            <p class="text-gray-400 mb-6">
+                                芯晨科技信用评估项目，主导调研100+中小微企业及20+金融机构，收集300+份需求样本，精准识别供应链金融信用评估痛点，完成产品需求定义与功能规划。
+                            </p>
+                            
+                            <h3 class="text-xl font-semibold mb-4">核心成果</h3>
+                            <ul class="space-y-2 mb-6">
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>AI模型设计与落地：设计金融+AI信用评估模型，融合多维度数据特征，模型准确率较基线提升20%</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>推动模型从研究验证到产品化应用，实现AI+金融产品全周期闭环</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>并参与2场金融科技产业进行产品演示，面向客户进行商业化落地</span>
+                                </li>
+                            </ul>
+
+                            <h3 class="text-xl font-semibold mb-4">产品亮点</h3>
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-blue-400 mb-2">20%</div>
+                                    <div class="text-gray-400 text-sm">准确率提升</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-purple-400 mb-2">300+</div>
+                                    <div class="text-gray-400 text-sm">需求样本</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-green-400 mb-2">100+</div>
+                                    <div class="text-gray-400 text-sm">企业调研</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'financial-data': {
+                    title: '财务数据管理系统',
+                    content: `
+                        <div class="mb-6">
+                            <div class="w-full h-64 rounded-xl bg-gradient-to-br from-green-600/30 to-teal-600/30 mb-6 flex items-center justify-center">
+                                <i class="fa fa-calculator text-8xl text-white/60"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">项目概述</h3>
+                            <p class="text-gray-400 mb-6">
+                                基于SAP系统构建的财务指标监控面板，覆盖进度偏差率、税务合规率、资金使用率等指标，推动事后统计向实时预警模式化转变。
+                            </p>
+                            
+                            <h3 class="text-xl font-semibold mb-4">核心成果</h3>
+                            <ul class="space-y-2 mb-6">
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>财务数据监控与风控预警：基于SAP系统建立预警机制，财务风险响应时效提升60%</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>降低资金占用成本8.7%，释放现金流1840万元</span>
+                                </li>
+                            </ul>
+
+                            <h3 class="text-xl font-semibold mb-4">产品亮点</h3>
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-green-400 mb-2">60%</div>
+                                    <div class="text-gray-400 text-sm">响应时效提升</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-blue-400 mb-2">8.7%</div>
+                                    <div class="text-gray-400 text-sm">成本降低</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-purple-400 mb-2">1840万</div>
+                                    <div class="text-gray-400 text-sm">现金流释放</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'ai-assistant': {
+                    title: 'AI智能助手',
+                    content: `
+                        <div class="mb-6">
+                            <div class="w-full h-64 rounded-xl bg-gradient-to-br from-orange-600/30 to-red-600/30 mb-6 flex items-center justify-center">
+                                <i class="fa fa-comments text-8xl text-white/60"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">项目概述</h3>
+                            <p class="text-gray-400 mb-6">
+                                科大讯飞AI产品，语音识别准确率优化，多轮对话一致性提升23%。构建覆盖模型边界case、幻觉检测、多轮对话质量评估的测试体系。
+                            </p>
+                            
+                            <h3 class="text-xl font-semibold mb-4">核心成果</h3>
+                            <ul class="space-y-2 mb-6">
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>南方方言口音语音识别准确率偏差从18%降至5%以下</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>多轮对话上下文一致性提升23%</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="fa fa-check-circle text-green-400"></i>
+                                    <span>关键路径转化率提升至89.6%，NPS值提升14.2分</span>
+                                </li>
+                            </ul>
+
+                            <h3 class="text-xl font-semibold mb-4">产品亮点</h3>
+                            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-orange-400 mb-2">23%</div>
+                                    <div class="text-gray-400 text-sm">一致性提升</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-green-400 mb-2">89.6%</div>
+                                    <div class="text-gray-400 text-sm">转化率</div>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-lg p-4 text-center">
+                                    <div class="text-3xl font-bold text-purple-400 mb-2">+14.2</div>
+                                    <div class="text-gray-400 text-sm">NPS提升</div>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'claworks': {
+                    title: 'Claworks智能研报生成',
+                    content: `
+                        <div class="mb-6">
+                            <div class="w-full h-64 rounded-xl bg-gradient-to-br from-pink-600/30 to-purple-6

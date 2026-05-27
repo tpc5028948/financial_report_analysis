@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业信用评估模型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/lib/index.min.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        .credit-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .result-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .error-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-line-chart text-purple-600 text-2xl"></i>
+                <h1 class="text-xl font-bold text-gray-800">企业信用评估模型</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
+                    <i class="fa fa-home mr-1"></i>首页
+                </a>
+                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
+                    <i class="fa fa-info-circle mr-1"></i>关于
+                </a>
+                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
+                    <i class="fa fa-question-circle mr-1"></i>帮助
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- 企业数据录入 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">企业数据录入</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 基本信息 -->
+                <div class="md:col-span-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-700 mb-2">公司名称</label>
+                            <input type="text" id="company_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">行业分类</label>
+                            <select id="industry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="制造业">制造业</option>
+                                <option value="信息技术">信息技术</option>
+                                <option value="金融服务">金融服务</option>
+                                <option value="房地产">房地产</option>
+                                <option value="零售">零售</option>
+                                <option value="能源">能源</option>
+                                <option value="医疗健康">医疗健康</option>
+                                <option value="交通运输">交通运输</option>
+                                <option value="互联网">互联网</option>
+                                <option value="电子设备">电子设备</option>
+                                <option value="半导体">半导体</option>
+                                <option value="软件">软件</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-2">报告期</label>
+                            <input type="text" id="report_period" placeholder="如: 2023年度" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 财务指标 -->
+                <div class="md:col-span-3">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">财务指标 (万元)</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-gray-600 mb-1">营业收入</label>
+                            <input type="number" id="revenue" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">净利润</label>
+                            <input type="number" id="net_profit" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">总资产</label>
+                            <input type="number" id="total_assets" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">总负债</label>
+                            <input type="number" id="total_liabilities" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">流动资产</label>
+                            <input type="number" id="current_assets" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">流动负债</label>
+                            <input type="number" id="current_liabilities" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">股东权益</label>
+                            <input type="number" id="equity" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">经营现金流</label>
+                            <input type="number" id="operating_cash_flow" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 市场数据 -->
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">市场数据</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-600 mb-1">市值 (万元)</label>
+                            <input type="number" id="market_cap" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">市盈率</label>
+                            <input type="number" id="pe_ratio" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">市净率</label>
+                            <input type="number" id="pb_ratio" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">波动率</label>
+                            <input type="number" id="volatility" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 经营信息 -->
+                <div class="md:col-span-1">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">经营信息</h3>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label class="block text-gray-600 mb-1">成立年限</label>
+                            <input type="number" id="established_years" step="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">员工人数</label>
+                            <input type="number" id="employee_count" step="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 mb-1">业务多元化 (0-1)</label>
+                            <input type="number" id="diversification" step="0.01" min="0" max="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文件上传 -->
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">上传财报文件 (可选)</h3>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-2"></i>
+                    <p class="text-gray-600 mb-4">支持 PDF、Excel 格式</p>
+                    <input type="file" id="file_upload" accept=".pdf,.xlsx,.xls" class="hidden">
+                    <button type="button" onclick="document.getElementById('file_upload').click()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fa fa-folder-open mr-2"></i>浏览文件
+                    </button>
+                    <div id="file_name" class="mt-2 text-sm text-gray-600"></div>
+                </div>
+            </div>
+
+            <!-- 分析按钮 -->
+            <div class="mt-8 flex justify-center">
+                <button onclick="analyzeData()" class="btn-primary text-white font-medium py-3 px-8 rounded-lg shadow-lg flex items-center">
+                    <i class="fa fa-line-chart mr-2"></i>开始信用评估
+                </button>
+            </div>
+        </div>
+
+        <!-- 评估结果 -->
+        <div id="results" class="hidden">
+            <!-- 信用评分卡片 -->
+            <div class="credit-card text-white p-6 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold mb-2">企业信用评分</h2>
+                        <p class="text-lg opacity-90" id="company_info"></p>
+                    </div>
+                    <div class="mt-4 md:mt-0 text-center">
+                        <div class="text-4xl font-bold" id="credit_score"></div>
+                        <div class="text-xl opacity-90" id="credit_level"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评估结果详情 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6 result-card">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">财务健康度</h3>
+                    <div class="flex items-end space-x-2">
+                        <span class="text-3xl font-bold text-purple-600" id="financial_health"></span>
+                        <span class="text-gray-500">/ 100</span>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-purple-600 rounded-full transition-all duration-1000 ease-out" id="financial_health_bar"></div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p>基于流动比率、资产负债率、ROE等指标综合评估企业财务健康状况</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 result-card">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">行业地位</h3>
+                    <div class="flex items-end space-x-2">
+                        <span class="text-3xl font-bold text-blue-600" id="industry_position"></span>
+                        <span class="text-gray-500">/ 100</span>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-600 rounded-full transition-all duration-1000 ease-out" id="industry_position_bar"></div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p>基于企业规模、市场份额、盈利能力与行业平均水平的对比</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 result-card">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">市场表现</h3>
+                    <div class="flex items-end space-x-2">
+                        <span class="text-3xl font-bold text-green-600" id="market_performance"></span>
+                        <span class="text-gray-500">/ 100</span>
+                    </div>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-600 rounded-full transition-all duration-1000 ease-out" id="market_performance_bar"></div>
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p>基于市盈率、市值、波动率等市场指标评估企业市场表现</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 财务指标详情 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">财务指标详情</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">指标</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数值</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">计算公式</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">说明</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financial-table-body">
+                            <!-- 财务指标数据将通过JS填充 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 行业对比 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">行业对比分析</h3>
+                <div class="chart-container">
+                    <canvas id="industryComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 多维度分析 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">信用等级概率分布</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="creditProbabilityChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">财务指标雷达图</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="financialRadarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 未来预测 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">未来经营状况预测</h3>
+                <div class="chart-container">
+                    <canvas id="futurePredictionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 企业分析 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">企业分析</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">企业特点</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_features"></ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">优势</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_strengths"></ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">劣势</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_weaknesses"></ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-700 mb-3">改进建议</h4>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_suggestions"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 建议措施 -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">建议措施</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-700" id="recommendations"></ul>
+            </div>
+
+            <!-- 导出按钮 -->
+            <div class="flex justify-center mt-8 space-x-4">
+                <button onclick="exportToPDF()" class="btn-secondary text-white font-medium py-2 px-6 rounded-lg shadow-md flex items-center">
+                    <i class="fa fa-file-pdf-o mr-2"></i>导出PDF报告
+                </button>
+                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg shadow-md transition-colors flex items-center">
+                    <i class="fa fa-file-excel-o mr-2"></i>导出Excel数据
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载中 -->
+    <div id="loading" class="loading-overlay hidden">
+        <div class="text-center">
+            <div class="spinner mx-auto mb-4"></div>
+            <p class="text-gray-700">正在分析数据，请稍候...</p>
+        </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div id="error_modal" class="error-modal hidden">
+        <div class="error-content">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fa fa-exclamation-circle text-red-500 text-2xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-lg font-medium text-gray-900">评估失败</h3>
+                    <div class="mt-2 text-gray-600" id="error_message"></div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="closeErrorModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                            确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFile = null;
+        let analysisResult = null;
+
+        // 监听文件上传
+        document.getElementById('file_upload').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                uploadedFile = e.target.files[0];
+                document.getElementById('file_name').textContent = uploadedFile.name;
+            }
+        });
+
+        // 收集表单数据
+        function collectFormData() {
+            return {
+                company_name: document.getElementById('company_name').value,
+                industry: document.getElementById('industry').value,
+                report_period: document.getElementById('report_period').value,
+                financial_indicators: {
+                    营业收入: parseFloat(document.getElementById('revenue').value) || 0,
+                    净利润: parseFloat(document.getElementById('net_profit').value) || 0,
+                    总资产: parseFloat(document.getElementById('total_assets').value) || 0,
+                    总负债: parseFloat(document.getElementById('total_liabilities').value) || 0,
+                    流动资产: parseFloat(document.getElementById('current_assets').value) || 0,
+                    流动负债: parseFloat(document.getElementById('current_liabilities').value) || 0,
+                    股东权益: parseFloat(document.getElementById('equity').value) || 0,
+                    经营现金流: parseFloat(document.getElementById('operating_cash_flow').value) || 0
+                },
+                market_data: {
+                    市值: parseFloat(document.getElementById('market_cap').value) || 0,
+                    市盈率: parseFloat(document.getElementById('pe_ratio').value) || 0,
+                    市净率: parseFloat(document.getElementById('pb_ratio').value) || 0,
+                    波动率: parseFloat(document.getElementById('volatility').value) || 0
+                },
+                business_info: {
+                    成立年限: parseInt(document.getElementById('established_years').value) || 0,
+                    员工人数: parseInt(document.getElementById('employee_count').value) || 0,
+                    业务多元化: parseFloat(document.getElementById('diversification').value) || 0.5
+                }
+            };
+        }
+
+        // 显示错误提示
+        function showError(message) {
+            document.getElementById('error_message').innerHTML = message;
+            document.getElementById('error_modal').classList.remove('hidden');
+        }
+
+        // 关闭错误提示
+        function closeErrorModal() {
+            document.getElementById('error_modal').classList.add('hidden');
+        }
+
+        // 分析数据
+        function analyzeData() {
+            if (uploadedFile) {
+                uploadAndAnalyze();
+            } else {
+                analyzeFormData();
+            }
+        }
+
+        // 上传文件并分析
+        function uploadAndAnalyze() {
+            const formData = new FormData();
+            formData.append('file', uploadedFile);
+            
+            const data = collectFormData();
+            formData.append('industry', data.industry);
+            formData.append('market_data', JSON.stringify(data.market_data));
+            formData.append('business_info', JSON.stringify(data.business_info));
+
+            // 显示加载中
+            document.getElementById('loading').classList.remove('hidden');
+
+            // 发送请求
+            fetch('http://127.0.0.1:8000/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError('评估失败：' + data.error);
+                } else {
+                    analysisResult = data;
+                    displayResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('评估失败：' + error.message + '<br><br>可能的原因：<br>- 后端服务未运行<br>- 网络连接问题<br>- 浏览器跨域限制');
+            })
+            .finally(() => {
+                document.getElementById('loading').classList.add('hidden');
+            });
+        }
+
+        // 分析表单数据
+        function analyzeFormData() {
+            const data = collectFormData();
+
+            // 显示加载中
+            document.getElementById('loading').classList.remove('hidden');
+
+            // 发送请求
+            fetch('http://127.0.0.1:8000/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError('评估失败：' + data.error);
+                } else {
+                    analysisResult = data;
+                    displayResults(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('评估失败：' + error.message + '<br><br>可能的原因：<br>- 后端服务未运行<br>- 网络连接问题<br>- 浏览器跨域限制');
+            })
+            .finally(() => {
+                document.getElementById('loading').classList.add('hidden');
+            });
+        }
+
+        // 显示结果
+        function displayResults(data) {
+            console.log('Analysis result:', data);
+            
+            // 显示结果区域
+            document.getElementById('results').classList.remove('hidden');
+            
+            // 基本信息
+            document.getElementById('company_info').textContent = data['基本信息']['公司名称'] + ' - ' + data['基本信息']['行业分类'];
+            document.getElementById('credit_score').textContent = data['信用评估']['信用评分'];
+            document.getElementById('credit_level').textContent = data['信用评估']['信用等级'];
+            
+            // 评估指标
+            const indicators = data['信用评分'] || data['信用评估指标'] || {};
+            document.getElementById('financial_health').textContent = (indicators['财务健康度'] || 0).toFixed(1);
+            document.getElementById('financial_health_bar').style.width = (indicators['财务健康度'] || 0) + '%';
+            
+            document.getElementById('industry_position').textContent = (indicators['行业地位'] || 0).toFixed(1);
+            document.getElementById('industry_position_bar').style.width = (indicators['行业地位'] || 0) + '%';
+            
+            document.getElementById('market_performance').textContent = (indicators['市场表现'] || 0).toFixed(1);
+            document.getElementById('market_performance_bar').style.width = (indicators['市场表现'] || 0) + '%';
+            
+            // 企业分析
+            const companyAnalysis = data['企业分析'] || {};
+            
+            // 企业特点
+            const companyFeatures = companyAnalysis['企业特点'] || [];
+            const featuresList = document.getElementById('company_features');
+            featuresList.innerHTML = '';
+            companyFeatures.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+            
+            // 优势
+            const companyStrengths = companyAnalysis['优势'] || [];
+            const strengthsList = document.getElementById('company_strengths');
+            strengthsList.innerHTML = '';
+            companyStrengths.forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+            
+            // 劣势
+            const companyWeaknesses = companyAnalysis['劣势'] || [];
+            const weaknessesList = document.getElementById('company_weaknesses');
+            weaknessesList.innerHTML = '';
+            companyWeaknesses.forEach(weakness => {
+                const li = document.createElement('li');
+                li.textContent = weakness;
+                weaknessesList.appendChild(li);
+            });
+            
+            // 改进建议
+            const companySuggestions = companyAnalysis['改进建议'] || [];
+            const suggestionsList = document.getElementById('company_suggestions');
+            suggestionsList.innerHTML = '';
+            companySuggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                suggestionsList.appendChild(li);
+            });
+            
+            // 建议措施
+            const recommendations = data['建议措施'] || [];
+            const recommendationsList = document.getElementById('recommendations');
+            recommendationsList.innerHTML = '';
+            recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                recommendationsList.appendChild(li);
+            });
+            
+            // 显示财务指标详情
+            const features = data['特征'] || {};
+            const tableBody = document.getElementById('financial-table-body');
+            tableBody.innerHTML = '';
+            
+            // 定义所有财务指标
+            const financialIndicators = [
+                { 
+                    name: '流动比率', 
+                    value: (features['流动比率'] || 0).toFixed(4), 
+                    formula: '流动资产 / 流动负债', 
+                    desc: '衡量短期偿债能力，理想值为2左右'
+                },
+                { 
+                    name: '资产负债率', 
+                    value: ((features['资产负债率'] || 0) * 100).toFixed(2) + '%', 
+                    formula: '总负债 / 总资产', 
+                    desc: '衡量长期偿债能力，制造业理想值低于60%'
+                },
+                { 
+                    name: 'ROE (净资产收益率)', 
+                    value: ((features['ROE'] || 0) * 100).toFixed(4) + '%', 
+                    formula: '净利润 / 股东权益', 
+                    desc: '反映股东权益的收益水平，越高越好'
+                },
+                { 
+                    name: 'ROA (总资产收益率)', 
+                    value: ((features['ROA'] || 0) * 100).toFixed(4) + '%', 
+                    formula: '净利润 / 总资产', 
+                    desc: '反映企业资产利用效率，越高越好'
+                },
+                { 
+                    name: '总资产周转率', 
+                    value: (features['总资产周转率'] || 0).toFixed(4), 
+                    formula: '营业收入 / 总资产', 
+                    desc: '反映企业资产利用效率，越高越好'
+                },
+                { 
+                    name: '应收账款周转率', 
+                    value: (features['应收账款周转率'] || 0).toFixed(4), 
+                    formula: '营业收入 / 应收账款', 
+                    desc: '反映企业应收账款管理效率，越高越好'
+                },
+                { 
+                    name: '营收增长率', 
+                    value: ((features['营收增长率'] || 0) * 100).toFixed(2) + '%', 
+                    formula: '(本期营收 - 上期营收) / 上期营收', 
+                    desc: '反映企业营业收入增长速度，越高越好'
+                },
+                { 
+                    name: '利润增长率', 
+                    value: ((features['利润增长率'] || 0) * 100).toFixed(2) + '%', 
+                    formula: '(本期利润 - 上期利润) / 上期利润', 
+                    desc: '反映企业利润增长速度，越高越好'
+                },
+                { 
+                    name: '现金流负债比', 
+                    value: (features['现金流负债比'] || 0).toFixed(4), 
+                    formula: '经营现金流 / 总负债', 
+                    desc: '衡量企业用经营现金流偿还债务的能力'
+                },
+                { 
+                    name: '市盈率 (P/E)', 
+                    value: features['市盈率'] ? features['市盈率'].toFixed(2) : 'N/A', 
+                    formula: '市值 / 净利润', 
+                    desc: '反映投资者对公司未来盈利的预期'
+                },
+                { 
+                    name: '市净率 (P/B)', 
+                    value: features['市净率'] ? features['市净率'].toFixed(2) : 'N/A', 
+                    formula: '市值 / 股东权益', 
+                    desc: '反映公司市场估值与净资产的关系'
+                }
+            ];
+            
+            // 填充表格
+            financialIndicators.forEach((indicator, index) => {
+                const row = tableBody.insertRow();
+                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                
+                const nameCell = row.insertCell(0);
+                nameCell.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900';
+                nameCell.textContent = indicator.name;
+                
+                const valueCell = row.insertCell(1);
+                valueCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono';
+                valueCell.textContent = indicator.value;
+                
+                const formulaCell = row.insertCell(2);
+                formulaCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono';
+                formulaCell.textContent = indicator.formula;
+                
+                const descCell = row.insertCell(3);
+                descCell.className = 'px-6 py-4 text-sm text-gray-600';
+                descCell.textContent = indicator.desc;
+            });
+            
+            // 行业对比图表
+            createIndustryComparisonChart(data['行业对比']);
+            
+            // 信用等级概率分布
+            const creditEvaluation = data['信用评估'] || {};
+            createCreditProbabilityChart(creditEvaluation['等级概率'] || {});
+            
+            // 财务指标雷达图
+            createFinancialRadarChart(data['特征'] || {});
+            
+            // 未来预测图表
+            if (data['未来预测']) {
+                createFuturePredictionChart(data['未来预测']);
+            }
+        }
+
+        // 创建行业对比图表 - 显示多个关键指标对比
+        function createIndustryComparisonChart(comparison) {
+            const ctx = document.getElementById('industryComparisonChart').getContext('2d');
+            
+            // 销毁旧图表
+            if (window.industryChart) {
+                window.industryChart.destroy();
+            }
+            
+            const comparisonData = comparison || { '公司指标': {}, '行业平均': {} };
+            const companyMetrics = comparisonData['公司指标'] || {};
+            const industryMetrics = comparisonData['行业平均'] || {};
+            
+            // 扩展对比指标，确保显示更多维度
+            const allIndicators = [
+                { key: '资产负债率', name: '资产负债率', unit: '%', scale: 100 },
+                { key: 'ROE', name: 'ROE', unit: '%', scale: 100 },
+                { key: 'ROA', name: 'ROA', unit: '%', scale: 100 },
+                { key: '净利润率', name: '净利润率', unit: '%', scale: 100 },
+                { key: '总资产周转率', name: '总资产周转率', unit: '次', scale: 1 },
+                { key: '流动比率', name: '流动比率', unit: '倍', scale: 1 },
+                { key: '营收增长率', name: '营收增长率', unit: '%', scale: 100 },
+                { key: '市盈率', name: '市盈率', unit: '倍', scale: 1 }
+            ];
+            
+            // 过滤掉没有数据的指标
+            const validIndicators = allIndicators.filter(ind => {
+                const companyVal = companyMetrics[ind.key];
+                const industryVal = industryMetrics[ind.key];
+                return (companyVal !== undefined && companyVal !== null) || 
+                       (industryVal !== undefined && industryVal !== null);
+            });
+            
+            // 如果没有有效数据，使用默认指标
+            const indicatorsToShow = validIndicators.length > 0 ? validIndicators : allIndicators.slice(0, 5);
+            
+            const labels = indicatorsToShow.map(ind => ind.name);
+            const companyData = indicatorsToShow.map(ind => {
+                const val = companyMetrics[ind.key];
+                return val !== undefined && val !== null ? val * ind.scale : 0;
+            });
+            const industryData = indicatorsToShow.map(ind => {
+                const val = industryMetrics[ind.key];
+                return val !== undefined && val !== null ? val * ind.scale : 0;
+            });
+            
+            // 计算差异百分比用于显示
+            const differences = indicatorsToShow.map((ind, idx) => {
+                const comp = companyData[idx];
+                const indus = industryData[idx];
+                if (indus !== 0) {
+                    return ((comp - indus) / indus * 100).toFixed(1);
+                }
+                return '0.0';
+            });
+            
+            window.industryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '公司指标',
+                            data: companyData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2,
+                            borderRadius: 4
+                        },
+                        {
+                            label: '行业平均',
+                            data: industryData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '企业与行业平均关键指标对比',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 14 },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const idx = context.dataIndex;
+                                    const diff = differences[idx];
+                                    const sign = parseFloat(diff) > 0 ? '+' : '';
+                                    return `差异: ${sign}${diff}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 创建信用等级概率分布图表
+        function createCreditProbabilityChart(probabilities) {
+            const ctx = document.getElementById('creditProbabilityChart').getContext('2d');
+            
+            // 销毁旧图表
+            if (window.creditChart) {
+                window.creditChart.destroy();
+            }
+            
+            // 处理空数据
+            const probData = probabilities || {};
+            const labels = Object.keys(probData).length > 0 ? Object.keys(probData) : ['AAA', 'AA', 'A', 'BBB', 'BB及以下'];
+            const data = Object.keys(probData).length > 0 ? Object.values(probData).map(p => p * 100) : [20, 20, 20, 20, 20];
+            
+            window.creditChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(153, 102, 255, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 创建财务指标雷达图
+        function createFinancialRadarChart(features) {
+            const ctx = document.getElementById('financialRadarChart').getContext('2d');
+            
+            // 销毁旧图表
+            if (window.radarChart) {
+                window.radarChart.destroy();
+            }
+            
+            // 标准化数据
+            function normalize(value, min, max) {
+                return Math.min(1, Math.max(0, (value - min) / (max - min)));
+            }
+            
+            const featureData = features || {};
+            const data = {
+                '流动比率': normalize(featureData['流动比率'] || 0, 0, 3),
+                'ROE': normalize(featureData['ROE'] || 0, 0, 0.3),
+                '总资产周转率': normalize(featureData['总资产周转率'] || 0, 0, 2),
+                '营收增长率': normalize(featureData['营收增长率'] || 0, 0, 0.5),
+                '现金流负债比': normalize(featureData['现金流负债比'] || 0, 0, 0.5)
+            };
+            
+            window.radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        label: '财务指标',
+                        data: Object.values(data),
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 1,
+                            ticks: {
+                                stepSize: 0.2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 创建未来预测图表 - 按月显示，更精细
+        function createFuturePredictionChart(prediction) {
+            const ctx = document.getElementById('futurePredictionChart').getContext('2d');
+            
+            // 销毁旧图表
+            if (window.predictionChart) {
+                window.predictionChart.destroy();
+            }
+            
+            // 处理空数据
+            const predData = prediction || {};
+            const years = predData['预测年份'] || ['2027', '2028', '2029'];
+            
+            // 生成月度标签和数据
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            let monthlyLabels = [];
+            let monthlyRevenue = [];
+            let monthlyProfit = [];
+            
+            years.forEach(year => {
+                const yearRevenue = predData[`${year}_月度营收`];
+                const yearProfit = predData[`${year}_月度利润`];
+                
+                if (yearRevenue && yearProfit) {
+                    yearRevenue.forEach((rev, idx) => {
+                        monthlyLabels.push(`${year}年${months[idx]}`);
+                        monthlyRevenue.push(rev);
+                        monthlyProfit.push(yearProfit[idx]);
+                    });
+                } else {
+                    // 如果没有月度数据，使用年度数据平均分配并添加波动
+                    const yearIdx = years.indexOf(year);
+                    const annualRevenue = predData['预测营业收入'] ? predData['预测营业收入'][yearIdx] : 100000;
+                    const annualProfit = predData['预测净利润'] ? predData['预测净利润'][yearIdx] : 10000;
+                    
+                    // 添加季节性波动
+                    const seasonalFactors = [0.85, 0.90, 1.05, 1.00, 1.02, 1.08, 0.95, 0.98, 1.10, 1.05, 1.15, 1.20];
+                    
+                    seasonalFactors.forEach((factor, idx) => {
+                        monthlyLabels.push(`${year}年${months[idx]}`);
+                        monthlyRevenue.push(annualRevenue / 12 * factor * (0.95 + Math.random() * 0.1));
+                        monthlyProfit.push(annualProfit / 12 * factor * (0.95 + Math.random() * 0.1));
+                    });
+                }
+            });
+            
+            window.predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [
+                        {
+                            label: '预测营业收入',
+                            data: monthlyRevenue,
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 2,
+                            pointHoverRadius: 5
+                        },
+                        {
+                            label: '预测净利润',
+                            data: monthlyProfit,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 2,
+                            pointHoverRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: '金额 (万元)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                autoSkip: true,
+                                maxTicksLimit: 12
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '未来3年经营状况预测（月度）',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('zh-CN', {
+                                            style: 'decimal',
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        }).format(context.parsed.y) + ' 万元';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // 导出PDF报告 - 使用html2canvas截图方式避免中文乱码
+        function exportToPDF() {
+            if (!analysisResult) {
+                showError('请先进行信用评估');
+                return;
+            }
+            
+            // 显示加载提示
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;color:white;font-size:18px;';
+            loadingDiv.innerHTML = '<div>正在生成PDF报告，请稍候...</div>';
+            document.body.appendChild(loadingDiv);
+            
+            // 延迟执行以确保UI更新
+            setTimeout(() => {
+                try {
+                    const element = document.getElementById('results');
+                    
+                    // 使用html2canvas捕获结果区域
+                    html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight
+                    }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                        
+                        const imgWidth = 210;
+                        const pageHeight = 295;
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        let heightLeft = imgHeight;
+                        let position = 0;
+                        
+                        // 添加第一页
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                        
+                        // 如果内容超过一页，添加更多页
+                        while (heightLeft >= 0) {
+                            position = heightLeft - imgHeight;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                            heightLeft -= pageHeight;
+                        }
+                        
+                        pdf.save('企业信用评估报告.pdf');
+                        
+                        // 移除加载提示
+                        document.body.removeChild(loadingDiv);
+                    }).catch(err => {
+                        console.error('PDF生成失败:', err);
+                        showError('PDF生成失败: ' + err.message);
+                        document.body.removeChild(loadingDiv);
+                    });
+                } catch (err) {
+                    console.error('PDF生成失败:', err);
+                    showError('PDF生成失败: ' + err.message);
+                    document.body.removeChild(loadingDiv);
+                }
+            }, 100);
+        }
+
+        // 导出Excel数据
+        function exportToExcel() {
+            if (!analysisResult) {
+                showError('请先进行信用评估');
+                return;
+            }
+            
+            // 创建Excel内容
+            let csvContent = "公司名称,行业分类,评估日期,信用评分,信用等级\n";
+            csvContent += analysisResult['基本信息']['公司名称'] + ",";
+            csvContent += analysisResult['基本信息']['行业分类'] + ",";
+            csvContent += analysisResult['基本信息']['评估日期'] + ",";
+            csvContent += analysisResult['信用评估']['信用评分'] + ",";
+            csvContent += analysisResult['信用评估']['信用等级'] + "\n";
+            
+            // 添加建议措施
+            csvContent += "\n建议措施\n";
+            analysisResult['建议措施'].forEach(rec => {
+                csvContent += "\"" + rec + "\"\n";
+            });
+            
+            // 下载CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', '企业信用评估数据.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('企业信用评估模型加载完成');
+        });
+    </script>
+</body>
+</html>

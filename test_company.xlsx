@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac">
+  <fileVersion appName="Calc" lastEdited="5" lowestEdited="5" rupBuild="9551"/>
+  <workbookPr defaultThemeVersion="124226"/>
+  <mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+    <mc:Choice Requires="x14ac">
+      <x14ac:absPath url="file:///C:/Users/Administrator/Documents/test_company.xlsx"/>
+    </mc:Choice>
+    <mc:Fallback/>
+  </mc:AlternateContent>
+  <sheets>
+    <sheet name="财务数据" sheetId="1" r:id="rId1"/>
+  </sheets>
+  <calcPr calcId="145621"/>
+</workbook>
