@@ -302,8 +302,8 @@ financial_report_analysis/
 
 ## 📧 联系方式
 
-- **邮箱**: product@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
+- **邮箱**: 2604408818@qq.com
+- **GitHub**: [@yourusername](https://github.com/tpc5028948)
 - **作品集**: [查看我的作品集](https://yourusername.github.io/financial_report_analysis/portfolio.html)
 
 ---
