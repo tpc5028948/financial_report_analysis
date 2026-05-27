@@ -4,7 +4,7 @@
 ![Flask](https://img.shields.io/badge/Flask-2.0%2B-green.svg)
 ![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.0%2B-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Stars](https://img.shields.io/github/stars/yourusername/financial_report_analysis.svg?style=social)
+![Stars](https://img.shields.io/github/stars/tpc5028958/financial_report_analysis.svg?style=social)
 
 ---
 
@@ -120,7 +120,7 @@ AI投研助手是一款基于**机器学习**的企业信用评估系统，通�
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/yourusername/financial_report_analysis.git
+git clone https://github.com/tpc5028958/financial_report_analysis.git
 cd financial_report_analysis
 ```
 
@@ -302,9 +302,9 @@ financial_report_analysis/
 
 ## 📧 联系方式
 
-- **邮箱**: product@example.com
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-- **作品集**: [查看我的作品集](https://yourusername.github.io/financial_report_analysis/portfolio.html)
+- **邮箱**: 2604408818@qq.com
+- **GitHub**: [@tpc5028958](https://github.com/tpc5028958)
+- **作品集**: [查看我的作品集](https://tpc5028958.github.io/financial_report_analysis/portfolio.html)
 
 ---
 
