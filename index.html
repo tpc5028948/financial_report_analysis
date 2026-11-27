@@ -1,1242 +1,434 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企业信用评估模型</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/lib/index.min.js"></script>
-    <style>
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background-color: #f0f2f5;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-        }
-        .credit-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-        .result-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .result-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
-        }
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .error-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .error-content {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>企业信用评估 Demo | 财务比率练习</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23172f4f'/%3E%3Cpath d='M8 24V16h4v8zm6 0V12h4v12zm6 0V8h4v16z' fill='%239ce2c9'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172f4f;
+      --paper: #f6f7f4;
+      --green: #00624f;
+      --accent: #00826b;
+      --mint: #9ce2c9;
+      --muted: #485a6c;
+      --line: #d6dedb;
+      --error: #a32220;
+      font-family: system-ui, "Microsoft YaHei", "PingFang SC", sans-serif;
+      line-height: 1.55;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    h1, h2, h3, p { margin: 0; }
+    h2 { font-size: 1.35rem; }
+    a { color: var(--green); text-underline-offset: .2em; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .6; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .wrap { width: min(calc(100% - 2rem), 70rem); margin-inline: auto; }
+    .masthead { border-bottom: 1px solid var(--line); }
+    .masthead .wrap { display: flex; align-items: center; justify-content: space-between; gap: .65rem 1rem; flex-wrap: wrap; padding-block: .9rem; }
+    .brand { font-weight: 750; }
+    .local { color: var(--green); font-size: .875rem; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 24rem); gap: 1.6rem; align-items: center; padding-block: clamp(1.5rem, 5vw, 3.5rem); }
+    h1 { max-width: 17ch; font-size: clamp(2rem, 5vw, 3.45rem); line-height: 1.17; letter-spacing: -.035em; }
+    .intro { max-width: 39ch; color: var(--muted); margin-top: .85rem; }
+    .examples h2 { font-size: 1rem; margin-bottom: .6rem; }
+    .example-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+    .example { min-height: 7.2rem; padding: .85rem; border: 1px solid var(--green); border-radius: .6rem; color: var(--green); background: #fff; text-align: left; display: grid; gap: .25rem; align-content: center; }
+    .example.primary { background: var(--green); color: #fff; }
+    .example:not(:disabled):hover { background: #e9f3ed; }
+    .example.primary:not(:disabled):hover { background: #004d3e; }
+    .example-detail, .preview { font-size: .82rem; }
+    .preview { font-weight: 650; font-variant-numeric: tabular-nums; }
+    .replacement { background: #fff; border-inline-start: 3px solid var(--accent); padding: .7rem; margin-top: .65rem; font-size: .9rem; }
+    .workspace { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: start; gap: 1.15rem; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: .75rem; overflow: hidden; min-width: 0; }
+    .pad { padding: clamp(1rem, 2.8vw, 1.5rem); }
+    .eyeline, .muted, .source { color: var(--muted); font-size: .875rem; }
+    .eyeline { margin-top: .35rem; }
+    .source { margin-top: .7rem; color: var(--green); }
+    fieldset { border: 0; border-top: 1px solid var(--line); margin: 1.05rem 0 0; padding: .65rem 0 0; min-width: 0; }
+    legend { padding: 0 .5rem 0 0; color: var(--ink); font-size: .9rem; font-weight: 700; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem 1rem; }
+    .field { min-width: 0; }
+    .field label { display: block; font-size: .9rem; }
+    .field input { width: 100%; min-height: 2.85rem; margin-top: .22rem; padding: .5rem .65rem; border: 1px solid #8b9b9e; border-radius: .35rem; background: #fbfcfa; color: var(--ink); font-size: 1rem; font-variant-numeric: tabular-nums; }
+    .field input[aria-invalid="true"] { border-color: var(--error); }
+    .field-error, .form-status[data-state="error"] { color: var(--error); }
+    .field-error { display: block; margin-top: .2rem; font-size: .8rem; }
+    .field-error:empty { display: none; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: 1rem; }
+    .action { min-height: 2.75rem; padding: .45rem .85rem; border: 1px solid var(--green); border-radius: .4rem; background: #fff; color: var(--green); font-weight: 650; }
+    .action.primary { color: #fff; background: var(--green); }
+    .action:not(:disabled):hover { box-shadow: inset 0 0 0 1px currentColor; }
+    .result-link { display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: .25rem; font-size: .9rem; }
+    .form-status { margin-top: .45rem; }
+    .scoreboard { background: var(--ink); color: #fff; }
+    .scoreboard h2:focus { outline: 2px solid var(--mint); outline-offset: 4px; }
+    .score-line { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem .8rem; margin-top: .35rem; }
+    .score { line-height: 1.05; font-weight: 770; font-size: clamp(2.7rem, 6.5vw, 4.2rem); letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+    .score-unit, .score-note { color: #e2ebe8; font-size: .875rem; }
+    .badge { background: #e1f1e7; color: var(--green); padding: .25rem .65rem; border-radius: .3rem; font-weight: 750; }
+    .badge.pending { background: transparent; color: #e2ebe8; border: 1px solid #8caaab; font-size: .875rem; }
+    .score-note { margin-top: .6rem; }
+    .breakdown { list-style: none; margin: 0; padding: 0; }
+    .metric { padding-block: .8rem; border-top: 1px solid var(--line); }
+    .metric:first-child { border: 0; padding-top: 0; }
+    .metric-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .25rem .8rem; }
+    .metric-top h3 { font-size: 1rem; }
+    .metric-points { color: var(--green); font-weight: 700; font-size: .875rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .metric-value { color: var(--ink); font-weight: 750; margin-left: .3em; }
+    .metric-formula, .metric-equation, .metric-range { font-size: .82rem; overflow-wrap: anywhere; }
+    .metric-formula, .metric-range { color: var(--muted); }
+    .metric-equation { color: var(--green); margin-block: .15rem; font-variant-numeric: tabular-nums; }
+    .meter { display: block; width: 100%; height: .35rem; margin: .4rem 0; border: 0; border-radius: .3rem; overflow: hidden; accent-color: var(--accent); background: #e8eeea; }
+    .meter::-webkit-progress-bar { background: #e8eeea; }
+    .meter::-webkit-progress-value { background: var(--accent); }
+    .meter::-moz-progress-bar { background: var(--accent); }
+    details { border-top: 1px solid var(--line); padding-top: .7rem; font-size: .875rem; color: var(--muted); }
+    summary { cursor: pointer; color: var(--green); font-weight: 700; padding-block: .45rem; }
+    details p { margin-block: .45rem; }
+    .grade-scale { display: flex; flex-wrap: wrap; gap: .35rem; padding: 0; margin: .5rem 0; list-style: none; }
+    .grade-scale li { padding: .2rem .5rem; background: var(--paper); color: var(--ink); border-radius: .25rem; }
+    footer { border-top: 1px solid var(--line); margin-block: 1.2rem 1.5rem; padding-block: .85rem; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    @media (max-width: 50rem) {
+      .hero, .workspace { grid-template-columns: minmax(0, 1fr); }
+      h1 { max-width: none; }
+      #results { scroll-margin-top: .5rem; }
+    }
+    @media (max-width: 23rem) {
+      .fields { gap: .65rem; }
+      .example { padding: .65rem; }
+    }
+  </style>
 </head>
-<body class="min-h-screen">
-    <!-- 导航栏 -->
-    <nav class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i class="fa fa-line-chart text-purple-600 text-2xl"></i>
-                <h1 class="text-xl font-bold text-gray-800">企业信用评估模型</h1>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
-                    <i class="fa fa-home mr-1"></i>首页
-                </a>
-                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
-                    <i class="fa fa-info-circle mr-1"></i>关于
-                </a>
-                <a href="#" class="text-gray-600 hover:text-purple-600 transition-colors">
-                    <i class="fa fa-question-circle mr-1"></i>帮助
-                </a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 主要内容 -->
-    <div class="container mx-auto px-4 py-8">
-        <!-- 企业数据录入 -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">企业数据录入</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 基本信息 -->
-                <div class="md:col-span-3">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-gray-700 mb-2">公司名称</label>
-                            <input type="text" id="company_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 mb-2">行业分类</label>
-                            <select id="industry" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                                <option value="制造业">制造业</option>
-                                <option value="信息技术">信息技术</option>
-                                <option value="金融服务">金融服务</option>
-                                <option value="房地产">房地产</option>
-                                <option value="零售">零售</option>
-                                <option value="能源">能源</option>
-                                <option value="医疗健康">医疗健康</option>
-                                <option value="交通运输">交通运输</option>
-                                <option value="互联网">互联网</option>
-                                <option value="电子设备">电子设备</option>
-                                <option value="半导体">半导体</option>
-                                <option value="软件">软件</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 mb-2">报告期</label>
-                            <input type="text" id="report_period" placeholder="如: 2023年度" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 财务指标 -->
-                <div class="md:col-span-3">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">财务指标 (万元)</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-gray-600 mb-1">营业收入</label>
-                            <input type="number" id="revenue" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">净利润</label>
-                            <input type="number" id="net_profit" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">总资产</label>
-                            <input type="number" id="total_assets" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">总负债</label>
-                            <input type="number" id="total_liabilities" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">流动资产</label>
-                            <input type="number" id="current_assets" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">流动负债</label>
-                            <input type="number" id="current_liabilities" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">股东权益</label>
-                            <input type="number" id="equity" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">经营现金流</label>
-                            <input type="number" id="operating_cash_flow" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 市场数据 -->
-                <div class="md:col-span-2">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">市场数据</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-600 mb-1">市值 (万元)</label>
-                            <input type="number" id="market_cap" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">市盈率</label>
-                            <input type="number" id="pe_ratio" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">市净率</label>
-                            <input type="number" id="pb_ratio" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">波动率</label>
-                            <input type="number" id="volatility" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 经营信息 -->
-                <div class="md:col-span-1">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3">经营信息</h3>
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-gray-600 mb-1">成立年限</label>
-                            <input type="number" id="established_years" step="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">员工人数</label>
-                            <input type="number" id="employee_count" step="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div>
-                            <label class="block text-gray-600 mb-1">业务多元化 (0-1)</label>
-                            <input type="number" id="diversification" step="0.01" min="0" max="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 文件上传 -->
-            <div class="mt-6">
-                <h3 class="text-lg font-semibold text-gray-700 mb-3">上传财报文件 (可选)</h3>
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <i class="fa fa-cloud-upload text-4xl text-gray-400 mb-2"></i>
-                    <p class="text-gray-600 mb-4">支持 PDF、Excel 格式</p>
-                    <input type="file" id="file_upload" accept=".pdf,.xlsx,.xls" class="hidden">
-                    <button type="button" onclick="document.getElementById('file_upload').click()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
-                        <i class="fa fa-folder-open mr-2"></i>浏览文件
-                    </button>
-                    <div id="file_name" class="mt-2 text-sm text-gray-600"></div>
-                </div>
-            </div>
-
-            <!-- 分析按钮 -->
-            <div class="mt-8 flex justify-center">
-                <button onclick="analyzeData()" class="btn-primary text-white font-medium py-3 px-8 rounded-lg shadow-lg flex items-center">
-                    <i class="fa fa-line-chart mr-2"></i>开始信用评估
-                </button>
-            </div>
-        </div>
-
-        <!-- 评估结果 -->
-        <div id="results" class="hidden">
-            <!-- 信用评分卡片 -->
-            <div class="credit-card text-white p-6 mb-8">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div>
-                        <h2 class="text-2xl font-bold mb-2">企业信用评分</h2>
-                        <p class="text-lg opacity-90" id="company_info"></p>
-                    </div>
-                    <div class="mt-4 md:mt-0 text-center">
-                        <div class="text-4xl font-bold" id="credit_score"></div>
-                        <div class="text-xl opacity-90" id="credit_level"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 评估结果详情 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md p-6 result-card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">财务健康度</h3>
-                    <div class="flex items-end space-x-2">
-                        <span class="text-3xl font-bold text-purple-600" id="financial_health"></span>
-                        <span class="text-gray-500">/ 100</span>
-                    </div>
-                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-purple-600 rounded-full transition-all duration-1000 ease-out" id="financial_health_bar"></div>
-                    </div>
-                    <div class="mt-4 text-sm text-gray-600">
-                        <p>基于流动比率、资产负债率、ROE等指标综合评估企业财务健康状况</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-6 result-card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">行业地位</h3>
-                    <div class="flex items-end space-x-2">
-                        <span class="text-3xl font-bold text-blue-600" id="industry_position"></span>
-                        <span class="text-gray-500">/ 100</span>
-                    </div>
-                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-blue-600 rounded-full transition-all duration-1000 ease-out" id="industry_position_bar"></div>
-                    </div>
-                    <div class="mt-4 text-sm text-gray-600">
-                        <p>基于企业规模、市场份额、盈利能力与行业平均水平的对比</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-6 result-card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">市场表现</h3>
-                    <div class="flex items-end space-x-2">
-                        <span class="text-3xl font-bold text-green-600" id="market_performance"></span>
-                        <span class="text-gray-500">/ 100</span>
-                    </div>
-                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-green-600 rounded-full transition-all duration-1000 ease-out" id="market_performance_bar"></div>
-                    </div>
-                    <div class="mt-4 text-sm text-gray-600">
-                        <p>基于市盈率、市值、波动率等市场指标评估企业市场表现</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 财务指标详情 -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">财务指标详情</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full bg-white">
-                        <thead>
-                            <tr class="bg-gray-100">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">指标</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">数值</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">计算公式</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">说明</th>
-                            </tr>
-                        </thead>
-                        <tbody id="financial-table-body">
-                            <!-- 财务指标数据将通过JS填充 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 行业对比 -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">行业对比分析</h3>
-                <div class="chart-container">
-                    <canvas id="industryComparisonChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 多维度分析 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">信用等级概率分布</h3>
-                    <div class="chart-container" style="height: 300px;">
-                        <canvas id="creditProbabilityChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">财务指标雷达图</h3>
-                    <div class="chart-container" style="height: 300px;">
-                        <canvas id="financialRadarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 未来预测 -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">未来经营状况预测</h3>
-                <div class="chart-container">
-                    <canvas id="futurePredictionChart"></canvas>
-                </div>
-            </div>
-
-            <!-- 企业分析 -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">企业分析</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-700 mb-3">企业特点</h4>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_features"></ul>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-700 mb-3">优势</h4>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_strengths"></ul>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-700 mb-3">劣势</h4>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_weaknesses"></ul>
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-700 mb-3">改进建议</h4>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="company_suggestions"></ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 建议措施 -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">建议措施</h3>
-                <ul class="list-disc list-inside space-y-2 text-gray-700" id="recommendations"></ul>
-            </div>
-
-            <!-- 导出按钮 -->
-            <div class="flex justify-center mt-8 space-x-4">
-                <button onclick="exportToPDF()" class="btn-secondary text-white font-medium py-2 px-6 rounded-lg shadow-md flex items-center">
-                    <i class="fa fa-file-pdf-o mr-2"></i>导出PDF报告
-                </button>
-                <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg shadow-md transition-colors flex items-center">
-                    <i class="fa fa-file-excel-o mr-2"></i>导出Excel数据
-                </button>
-            </div>
-        </div>
+<body>
+  <header class="masthead">
+    <div class="wrap">
+      <div class="brand">企业信用评估 Demo</div>
+      <div class="local">交互 Demo | 浏览器内计算</div>
     </div>
-
-    <!-- 加载中 -->
-    <div id="loading" class="loading-overlay hidden">
-        <div class="text-center">
-            <div class="spinner mx-auto mb-4"></div>
-            <p class="text-gray-700">正在分析数据，请稍候...</p>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="main-title">
+      <div>
+        <h1 id="main-title">用四个财务比率试算信用等级</h1>
+        <p class="intro">一键载入示例，或修改金额后重新计算。对比流动性、负债、利润和现金流如何影响总分。</p>
+      </div>
+      <div class="examples">
+        <h2>一键加载合成示例</h2>
+        <div class="example-list">
+          <button type="button" class="example primary" data-example="steady" aria-controls="inputs results" disabled>
+            <strong>加载稳健经营</strong>
+            <span class="example-detail">现金流为正</span>
+            <span class="preview"></span>
+          </button>
+          <button type="button" class="example" data-example="pressure" aria-controls="inputs results" disabled>
+            <strong>加载现金承压</strong>
+            <span class="example-detail">仍盈利，现金流为负</span>
+            <span class="preview"></span>
+          </button>
         </div>
-    </div>
-
-    <!-- 错误提示 -->
-    <div id="error_modal" class="error-modal hidden">
-        <div class="error-content">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fa fa-exclamation-circle text-red-500 text-2xl"></i>
-                </div>
-                <div class="ml-3">
-                    <h3 class="text-lg font-medium text-gray-900">评估失败</h3>
-                    <div class="mt-2 text-gray-600" id="error_message"></div>
-                    <div class="mt-4 flex justify-end">
-                        <button onclick="closeErrorModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                            确定
-                        </button>
-                    </div>
-                </div>
+        <div id="replacement" class="replacement" role="group" aria-labelledby="replacement-message" hidden>
+          <p id="replacement-message"></p>
+          <div class="actions">
+            <button id="keep-inputs" type="button" class="action">保留当前输入</button>
+            <button id="replace-inputs" type="button" class="action primary">替换并计算</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <noscript><p class="panel pad">请启用 JavaScript 以在浏览器内计算。无需联网或安装其他组件。</p></noscript>
+    <div class="workspace">
+      <section class="panel pad" id="inputs" aria-labelledby="inputs-title">
+        <h2 id="inputs-title">1. 调整财务数字</h2>
+        <p id="field-guide" class="eyeline">金额统一为万元，最多两位小数，不用千位分隔符。使用同一示例期的数据；请勿填写真实财务数据。</p>
+        <p id="source" class="source">尚未载入示例，也可自行填写虚构数字。</p>
+        <form id="figures" novalidate autocomplete="off" aria-describedby="field-guide">
+          <fieldset>
+            <legend>期末资产与负债</legend>
+            <div class="fields">
+              <div class="field"><label for="assets">总资产</label><input id="assets" inputmode="decimal" data-amount data-min="1" aria-describedby="assets-error" required><span id="assets-error" class="field-error"></span></div>
+              <div class="field"><label for="debt">总负债</label><input id="debt" inputmode="decimal" data-amount aria-describedby="debt-error" required><span id="debt-error" class="field-error"></span></div>
+              <div class="field"><label for="current-assets">流动资产</label><input id="current-assets" inputmode="decimal" data-amount aria-describedby="current-assets-error" required><span id="current-assets-error" class="field-error"></span></div>
+              <div class="field"><label for="current-debt">流动负债</label><input id="current-debt" inputmode="decimal" data-amount data-min="1" aria-describedby="current-debt-error" required><span id="current-debt-error" class="field-error"></span></div>
             </div>
+          </fieldset>
+          <fieldset>
+            <legend>本期收入、利润与现金流</legend>
+            <div class="fields">
+              <div class="field"><label for="revenue">营业收入</label><input id="revenue" inputmode="decimal" data-amount data-min="1" aria-describedby="revenue-error" required><span id="revenue-error" class="field-error"></span></div>
+              <div class="field"><label for="profit">净利润（可为负）</label><input id="profit" data-amount data-min="-100000000" aria-describedby="profit-error" required><span id="profit-error" class="field-error"></span></div>
+              <div class="field"><label for="cash">经营现金流（可为负）</label><input id="cash" data-amount data-min="-100000000" aria-describedby="cash-error" required><span id="cash-error" class="field-error"></span></div>
+            </div>
+          </fieldset>
+          <div class="actions">
+            <button id="calculate" class="action primary" type="submit" disabled>计算分数</button>
+            <a class="result-link" href="#results">查看评分与规则</a>
+          </div>
+          <p id="form-status" class="muted form-status" role="status"></p>
+        </form>
+      </section>
+      <section class="panel" id="results" aria-labelledby="results-title">
+        <div class="scoreboard pad">
+          <h2 id="results-title" tabindex="-1">2. 评分与明细</h2>
+          <div class="score-line">
+            <div><span id="score" class="score">—</span> <span class="score-unit">/ 100 分</span></div>
+            <span id="grade" class="badge pending">待计算</span>
+          </div>
+          <p id="score-note" class="score-note">加载示例或填写金额后计算，下面可查看每项规则。</p>
+          <p id="score-announce" class="sr-only" role="status"></p>
         </div>
+        <div class="pad">
+          <ul class="breakdown" id="breakdown" aria-label="四项得分明细"></ul>
+          <details id="rules" open>
+            <summary>总分算法和等级边界</summary>
+            <p>每项从零分线到满分线按比例计分，线外只取 0 分或满分。子项得分 = 权重分 ×（实际比率 − 零分线）÷（满分线 − 零分线），结果限制在 0 分与该项权重分之间。</p>
+            <p>计算使用未舍入的比率；子项得分四舍五入到两位小数后相加，再用总分划分等级。</p>
+            <ul id="grade-scale" class="grade-scale" aria-label="等级边界"></ul>
+          </details>
+        </div>
+      </section>
     </div>
+    <footer class="muted">
+      <strong>规则演示，不是正式评级。</strong> 数据仅在浏览器内计算，不上传或保存。
+      <a id="portfolio-back" class="result-link" href="https://tpc5028948.github.io/InsightAI/">返回 AI 产品作品集</a>
+    </footer>
+  </main>
+  <template id="metric-template">
+    <li class="metric">
+      <div class="metric-top">
+        <h3><span class="metric-name"></span><span class="metric-value"></span></h3>
+        <span class="metric-points"></span>
+      </div>
+      <p class="metric-formula"></p>
+      <p class="metric-equation" hidden></p>
+      <progress class="meter" hidden></progress>
+      <p class="metric-range"></p>
+    </li>
+  </template>
+  <script>
+    (() => {
+      'use strict';
+      const byId = (id) => document.getElementById(id);
+      if (location.protocol === 'file:' || ['127.0.0.1','localhost'].includes(location.hostname)) {
+        byId('portfolio-back').href = '../insightai_public_preview/index.html';
+      }
+      const form = byId('figures');
+      const fields = [...form.querySelectorAll('[data-amount]')];
+      const exampleButtons = [...document.querySelectorAll('[data-example]')];
+      const breakdown = byId('breakdown');
+      const maxCents = 100000000; // 1,000,000 万元 in hundredths of the input unit.
+      const amountFormat = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 2 });
+      const fixed = (value) => value.toFixed(2);
+      const points = (hundredths) => fixed(hundredths / 100);
+      const rules = [
+        { name: '流动比率', numerator: 'current-assets', denominator: 'current-debt', formula: '流动资产 ÷ 流动负债', unit: 'times', zero: 100, full: 200, weight: 25 },
+        { name: '资产负债率', numerator: 'debt', denominator: 'assets', formula: '总负债 ÷ 总资产 × 100%', unit: 'percent', zero: 80, full: 40, weight: 30 },
+        { name: '净利率', numerator: 'profit', denominator: 'revenue', formula: '净利润 ÷ 营业收入 × 100%', unit: 'percent', zero: 0, full: 15, weight: 20 },
+        { name: '经营现金流占收入', numerator: 'cash', denominator: 'revenue', formula: '经营现金流 ÷ 营业收入 × 100%', unit: 'percent', zero: 0, full: 15, weight: 25 }
+      ];
+      const grades = [['AAA', 90], ['AA', 80], ['A', 70], ['BBB', 60], ['BB', 0]];
+      const examples = {
+        steady: { name: '稳健经营', amounts: { assets: 4500, debt: 2100, 'current-assets': 1800, 'current-debt': 1000, revenue: 5000, profit: 600, cash: 650 } },
+        pressure: { name: '现金承压', amounts: { assets: 4500, debt: 3000, 'current-assets': 1250, 'current-debt': 1000, revenue: 5000, profit: 300, cash: -150 } }
+      };
+      const subsetChecks = [['current-assets', 'assets', '总资产'], ['current-debt', 'debt', '总负债']];
+      let loaded = null;
+      let baseline = fields.map(() => '');
+      let pendingButton = null;
 
-    <script>
-        let uploadedFile = null;
-        let analysisResult = null;
+      const ratioText = (value, rule) => fixed(rule.unit === 'times' ? value / 100 : value) + (rule.unit === 'times' ? ' 倍' : '%');
+      const gradeFor = (hundredths) => grades.find(([, minimum]) => hundredths >= minimum * 100)[0];
 
-        // 监听文件上传
-        document.getElementById('file_upload').addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                uploadedFile = e.target.files[0];
-                document.getElementById('file_name').textContent = uploadedFile.name;
-            }
+      // Inputs are integer hundredths of a 万元; ratio thresholds are scaled by 100.
+      // Keep the arithmetic exact until display. Validated input bounds keep products below MAX_SAFE_INTEGER.
+      function evaluate(cents) {
+        const items = rules.map((rule) => {
+          const numerator = cents[rule.numerator];
+          const denominator = cents[rule.denominator];
+          const scaled = numerator * 100;
+          const delta = rule.full - rule.zero;
+          const span = Math.abs(delta) * denominator;
+          const offset = (scaled - rule.zero * denominator) * Math.sign(delta);
+          const bounded = Math.max(0, Math.min(span, offset));
+          const subscore = Math.floor((2 * rule.weight * 100 * bounded + span) / (2 * span));
+          return { numerator, denominator, ratio: scaled / denominator, subscore };
         });
+        const score = items.reduce((sum, item) => sum + item.subscore, 0);
+        return { items, score, grade: gradeFor(score) };
+      }
 
-        // 收集表单数据
-        function collectFormData() {
-            return {
-                company_name: document.getElementById('company_name').value,
-                industry: document.getElementById('industry').value,
-                report_period: document.getElementById('report_period').value,
-                financial_indicators: {
-                    营业收入: parseFloat(document.getElementById('revenue').value) || 0,
-                    净利润: parseFloat(document.getElementById('net_profit').value) || 0,
-                    总资产: parseFloat(document.getElementById('total_assets').value) || 0,
-                    总负债: parseFloat(document.getElementById('total_liabilities').value) || 0,
-                    流动资产: parseFloat(document.getElementById('current_assets').value) || 0,
-                    流动负债: parseFloat(document.getElementById('current_liabilities').value) || 0,
-                    股东权益: parseFloat(document.getElementById('equity').value) || 0,
-                    经营现金流: parseFloat(document.getElementById('operating_cash_flow').value) || 0
-                },
-                market_data: {
-                    市值: parseFloat(document.getElementById('market_cap').value) || 0,
-                    市盈率: parseFloat(document.getElementById('pe_ratio').value) || 0,
-                    市净率: parseFloat(document.getElementById('pb_ratio').value) || 0,
-                    波动率: parseFloat(document.getElementById('volatility').value) || 0
-                },
-                business_info: {
-                    成立年限: parseInt(document.getElementById('established_years').value) || 0,
-                    员工人数: parseInt(document.getElementById('employee_count').value) || 0,
-                    业务多元化: parseFloat(document.getElementById('diversification').value) || 0.5
-                }
-            };
-        }
+      const views = rules.map((rule) => {
+        const row = byId('metric-template').content.firstElementChild.cloneNode(true);
+        const value = row.querySelector('.metric-value');
+        const pointLabel = row.querySelector('.metric-points');
+        const equation = row.querySelector('.metric-equation');
+        const meter = row.querySelector('.meter');
+        const rises = rule.full > rule.zero;
+        row.querySelector('.metric-name').textContent = rule.name;
+        row.querySelector('.metric-formula').textContent = rule.formula;
+        row.querySelector('.metric-range').textContent = `${ratioText(rule.zero, rule)}及${rises ? '以下' : '以上'}得 0 分；${ratioText(rule.full, rule)}及${rises ? '以上' : '以下'}得 ${rule.weight} 分。`;
+        meter.max = rule.weight;
+        meter.setAttribute('aria-label', `${rule.name}得分`);
+        breakdown.append(row);
+        return { value, pointLabel, equation, meter };
+      });
+      grades.forEach(([grade, minimum], index) => {
+        const li = document.createElement('li');
+        li.textContent = `${grade} ${index === 0 ? `${minimum}–100` : minimum === 0 ? `<${grades[index - 1][1]}` : `${minimum}–<${grades[index - 1][1]}`}`;
+        byId('grade-scale').append(li);
+      });
 
-        // 显示错误提示
-        function showError(message) {
-            document.getElementById('error_message').innerHTML = message;
-            document.getElementById('error_modal').classList.remove('hidden');
-        }
-
-        // 关闭错误提示
-        function closeErrorModal() {
-            document.getElementById('error_modal').classList.add('hidden');
-        }
-
-        // 分析数据
-        function analyzeData() {
-            if (uploadedFile) {
-                uploadAndAnalyze();
-            } else {
-                analyzeFormData();
-            }
-        }
-
-        // 上传文件并分析
-        function uploadAndAnalyze() {
-            const formData = new FormData();
-            formData.append('file', uploadedFile);
-            
-            const data = collectFormData();
-            formData.append('industry', data.industry);
-            formData.append('market_data', JSON.stringify(data.market_data));
-            formData.append('business_info', JSON.stringify(data.business_info));
-
-            // 显示加载中
-            document.getElementById('loading').classList.remove('hidden');
-
-            // 发送请求
-            fetch('http://127.0.0.1:8000/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showError('评估失败：' + data.error);
-                } else {
-                    analysisResult = data;
-                    displayResults(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('评估失败：' + error.message + '<br><br>可能的原因：<br>- 后端服务未运行<br>- 网络连接问题<br>- 浏览器跨域限制');
-            })
-            .finally(() => {
-                document.getElementById('loading').classList.add('hidden');
-            });
-        }
-
-        // 分析表单数据
-        function analyzeFormData() {
-            const data = collectFormData();
-
-            // 显示加载中
-            document.getElementById('loading').classList.remove('hidden');
-
-            // 发送请求
-            fetch('http://127.0.0.1:8000/api/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showError('评估失败：' + data.error);
-                } else {
-                    analysisResult = data;
-                    displayResults(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('评估失败：' + error.message + '<br><br>可能的原因：<br>- 后端服务未运行<br>- 网络连接问题<br>- 浏览器跨域限制');
-            })
-            .finally(() => {
-                document.getElementById('loading').classList.add('hidden');
-            });
-        }
-
-        // 显示结果
-        function displayResults(data) {
-            console.log('Analysis result:', data);
-            
-            // 显示结果区域
-            document.getElementById('results').classList.remove('hidden');
-            
-            // 基本信息
-            document.getElementById('company_info').textContent = data['基本信息']['公司名称'] + ' - ' + data['基本信息']['行业分类'];
-            document.getElementById('credit_score').textContent = data['信用评估']['信用评分'];
-            document.getElementById('credit_level').textContent = data['信用评估']['信用等级'];
-            
-            // 评估指标
-            const indicators = data['信用评分'] || data['信用评估指标'] || {};
-            document.getElementById('financial_health').textContent = (indicators['财务健康度'] || 0).toFixed(1);
-            document.getElementById('financial_health_bar').style.width = (indicators['财务健康度'] || 0) + '%';
-            
-            document.getElementById('industry_position').textContent = (indicators['行业地位'] || 0).toFixed(1);
-            document.getElementById('industry_position_bar').style.width = (indicators['行业地位'] || 0) + '%';
-            
-            document.getElementById('market_performance').textContent = (indicators['市场表现'] || 0).toFixed(1);
-            document.getElementById('market_performance_bar').style.width = (indicators['市场表现'] || 0) + '%';
-            
-            // 企业分析
-            const companyAnalysis = data['企业分析'] || {};
-            
-            // 企业特点
-            const companyFeatures = companyAnalysis['企业特点'] || [];
-            const featuresList = document.getElementById('company_features');
-            featuresList.innerHTML = '';
-            companyFeatures.forEach(feature => {
-                const li = document.createElement('li');
-                li.textContent = feature;
-                featuresList.appendChild(li);
-            });
-            
-            // 优势
-            const companyStrengths = companyAnalysis['优势'] || [];
-            const strengthsList = document.getElementById('company_strengths');
-            strengthsList.innerHTML = '';
-            companyStrengths.forEach(strength => {
-                const li = document.createElement('li');
-                li.textContent = strength;
-                strengthsList.appendChild(li);
-            });
-            
-            // 劣势
-            const companyWeaknesses = companyAnalysis['劣势'] || [];
-            const weaknessesList = document.getElementById('company_weaknesses');
-            weaknessesList.innerHTML = '';
-            companyWeaknesses.forEach(weakness => {
-                const li = document.createElement('li');
-                li.textContent = weakness;
-                weaknessesList.appendChild(li);
-            });
-            
-            // 改进建议
-            const companySuggestions = companyAnalysis['改进建议'] || [];
-            const suggestionsList = document.getElementById('company_suggestions');
-            suggestionsList.innerHTML = '';
-            companySuggestions.forEach(suggestion => {
-                const li = document.createElement('li');
-                li.textContent = suggestion;
-                suggestionsList.appendChild(li);
-            });
-            
-            // 建议措施
-            const recommendations = data['建议措施'] || [];
-            const recommendationsList = document.getElementById('recommendations');
-            recommendationsList.innerHTML = '';
-            recommendations.forEach(rec => {
-                const li = document.createElement('li');
-                li.textContent = rec;
-                recommendationsList.appendChild(li);
-            });
-            
-            // 显示财务指标详情
-            const features = data['特征'] || {};
-            const tableBody = document.getElementById('financial-table-body');
-            tableBody.innerHTML = '';
-            
-            // 定义所有财务指标
-            const financialIndicators = [
-                { 
-                    name: '流动比率', 
-                    value: (features['流动比率'] || 0).toFixed(4), 
-                    formula: '流动资产 / 流动负债', 
-                    desc: '衡量短期偿债能力，理想值为2左右'
-                },
-                { 
-                    name: '资产负债率', 
-                    value: ((features['资产负债率'] || 0) * 100).toFixed(2) + '%', 
-                    formula: '总负债 / 总资产', 
-                    desc: '衡量长期偿债能力，制造业理想值低于60%'
-                },
-                { 
-                    name: 'ROE (净资产收益率)', 
-                    value: ((features['ROE'] || 0) * 100).toFixed(4) + '%', 
-                    formula: '净利润 / 股东权益', 
-                    desc: '反映股东权益的收益水平，越高越好'
-                },
-                { 
-                    name: 'ROA (总资产收益率)', 
-                    value: ((features['ROA'] || 0) * 100).toFixed(4) + '%', 
-                    formula: '净利润 / 总资产', 
-                    desc: '反映企业资产利用效率，越高越好'
-                },
-                { 
-                    name: '总资产周转率', 
-                    value: (features['总资产周转率'] || 0).toFixed(4), 
-                    formula: '营业收入 / 总资产', 
-                    desc: '反映企业资产利用效率，越高越好'
-                },
-                { 
-                    name: '应收账款周转率', 
-                    value: (features['应收账款周转率'] || 0).toFixed(4), 
-                    formula: '营业收入 / 应收账款', 
-                    desc: '反映企业应收账款管理效率，越高越好'
-                },
-                { 
-                    name: '营收增长率', 
-                    value: ((features['营收增长率'] || 0) * 100).toFixed(2) + '%', 
-                    formula: '(本期营收 - 上期营收) / 上期营收', 
-                    desc: '反映企业营业收入增长速度，越高越好'
-                },
-                { 
-                    name: '利润增长率', 
-                    value: ((features['利润增长率'] || 0) * 100).toFixed(2) + '%', 
-                    formula: '(本期利润 - 上期利润) / 上期利润', 
-                    desc: '反映企业利润增长速度，越高越好'
-                },
-                { 
-                    name: '现金流负债比', 
-                    value: (features['现金流负债比'] || 0).toFixed(4), 
-                    formula: '经营现金流 / 总负债', 
-                    desc: '衡量企业用经营现金流偿还债务的能力'
-                },
-                { 
-                    name: '市盈率 (P/E)', 
-                    value: features['市盈率'] ? features['市盈率'].toFixed(2) : 'N/A', 
-                    formula: '市值 / 净利润', 
-                    desc: '反映投资者对公司未来盈利的预期'
-                },
-                { 
-                    name: '市净率 (P/B)', 
-                    value: features['市净率'] ? features['市净率'].toFixed(2) : 'N/A', 
-                    formula: '市值 / 股东权益', 
-                    desc: '反映公司市场估值与净资产的关系'
-                }
-            ];
-            
-            // 填充表格
-            financialIndicators.forEach((indicator, index) => {
-                const row = tableBody.insertRow();
-                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-                
-                const nameCell = row.insertCell(0);
-                nameCell.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900';
-                nameCell.textContent = indicator.name;
-                
-                const valueCell = row.insertCell(1);
-                valueCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-mono';
-                valueCell.textContent = indicator.value;
-                
-                const formulaCell = row.insertCell(2);
-                formulaCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono';
-                formulaCell.textContent = indicator.formula;
-                
-                const descCell = row.insertCell(3);
-                descCell.className = 'px-6 py-4 text-sm text-gray-600';
-                descCell.textContent = indicator.desc;
-            });
-            
-            // 行业对比图表
-            createIndustryComparisonChart(data['行业对比']);
-            
-            // 信用等级概率分布
-            const creditEvaluation = data['信用评估'] || {};
-            createCreditProbabilityChart(creditEvaluation['等级概率'] || {});
-            
-            // 财务指标雷达图
-            createFinancialRadarChart(data['特征'] || {});
-            
-            // 未来预测图表
-            if (data['未来预测']) {
-                createFuturePredictionChart(data['未来预测']);
-            }
-        }
-
-        // 创建行业对比图表 - 显示多个关键指标对比
-        function createIndustryComparisonChart(comparison) {
-            const ctx = document.getElementById('industryComparisonChart').getContext('2d');
-            
-            // 销毁旧图表
-            if (window.industryChart) {
-                window.industryChart.destroy();
-            }
-            
-            const comparisonData = comparison || { '公司指标': {}, '行业平均': {} };
-            const companyMetrics = comparisonData['公司指标'] || {};
-            const industryMetrics = comparisonData['行业平均'] || {};
-            
-            // 扩展对比指标，确保显示更多维度
-            const allIndicators = [
-                { key: '资产负债率', name: '资产负债率', unit: '%', scale: 100 },
-                { key: 'ROE', name: 'ROE', unit: '%', scale: 100 },
-                { key: 'ROA', name: 'ROA', unit: '%', scale: 100 },
-                { key: '净利润率', name: '净利润率', unit: '%', scale: 100 },
-                { key: '总资产周转率', name: '总资产周转率', unit: '次', scale: 1 },
-                { key: '流动比率', name: '流动比率', unit: '倍', scale: 1 },
-                { key: '营收增长率', name: '营收增长率', unit: '%', scale: 100 },
-                { key: '市盈率', name: '市盈率', unit: '倍', scale: 1 }
-            ];
-            
-            // 过滤掉没有数据的指标
-            const validIndicators = allIndicators.filter(ind => {
-                const companyVal = companyMetrics[ind.key];
-                const industryVal = industryMetrics[ind.key];
-                return (companyVal !== undefined && companyVal !== null) || 
-                       (industryVal !== undefined && industryVal !== null);
-            });
-            
-            // 如果没有有效数据，使用默认指标
-            const indicatorsToShow = validIndicators.length > 0 ? validIndicators : allIndicators.slice(0, 5);
-            
-            const labels = indicatorsToShow.map(ind => ind.name);
-            const companyData = indicatorsToShow.map(ind => {
-                const val = companyMetrics[ind.key];
-                return val !== undefined && val !== null ? val * ind.scale : 0;
-            });
-            const industryData = indicatorsToShow.map(ind => {
-                const val = industryMetrics[ind.key];
-                return val !== undefined && val !== null ? val * ind.scale : 0;
-            });
-            
-            // 计算差异百分比用于显示
-            const differences = indicatorsToShow.map((ind, idx) => {
-                const comp = companyData[idx];
-                const indus = industryData[idx];
-                if (indus !== 0) {
-                    return ((comp - indus) / indus * 100).toFixed(1);
-                }
-                return '0.0';
-            });
-            
-            window.industryChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '公司指标',
-                            data: companyData,
-                            backgroundColor: 'rgba(102, 126, 234, 0.7)',
-                            borderColor: 'rgba(102, 126, 234, 1)',
-                            borderWidth: 2,
-                            borderRadius: 4
-                        },
-                        {
-                            label: '行业平均',
-                            data: industryData,
-                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 2,
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '企业与行业平均关键指标对比',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            },
-                            padding: 20
-                        },
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 12
-                                },
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleFont: { size: 14 },
-                            bodyFont: { size: 13 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    const idx = context.dataIndex;
-                                    const diff = differences[idx];
-                                    const sign = parseFloat(diff) > 0 ? '+' : '';
-                                    return `差异: ${sign}${diff}%`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 创建信用等级概率分布图表
-        function createCreditProbabilityChart(probabilities) {
-            const ctx = document.getElementById('creditProbabilityChart').getContext('2d');
-            
-            // 销毁旧图表
-            if (window.creditChart) {
-                window.creditChart.destroy();
-            }
-            
-            // 处理空数据
-            const probData = probabilities || {};
-            const labels = Object.keys(probData).length > 0 ? Object.keys(probData) : ['AAA', 'AA', 'A', 'BBB', 'BB及以下'];
-            const data = Object.keys(probData).length > 0 ? Object.values(probData).map(p => p * 100) : [20, 20, 20, 20, 20];
-            
-            window.creditChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: [
-                            'rgba(75, 192, 192, 0.8)',
-                            'rgba(54, 162, 235, 0.8)',
-                            'rgba(255, 206, 86, 0.8)',
-                            'rgba(255, 99, 132, 0.8)',
-                            'rgba(153, 102, 255, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(153, 102, 255, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': ' + context.parsed + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 创建财务指标雷达图
-        function createFinancialRadarChart(features) {
-            const ctx = document.getElementById('financialRadarChart').getContext('2d');
-            
-            // 销毁旧图表
-            if (window.radarChart) {
-                window.radarChart.destroy();
-            }
-            
-            // 标准化数据
-            function normalize(value, min, max) {
-                return Math.min(1, Math.max(0, (value - min) / (max - min)));
-            }
-            
-            const featureData = features || {};
-            const data = {
-                '流动比率': normalize(featureData['流动比率'] || 0, 0, 3),
-                'ROE': normalize(featureData['ROE'] || 0, 0, 0.3),
-                '总资产周转率': normalize(featureData['总资产周转率'] || 0, 0, 2),
-                '营收增长率': normalize(featureData['营收增长率'] || 0, 0, 0.5),
-                '现金流负债比': normalize(featureData['现金流负债比'] || 0, 0, 0.5)
-            };
-            
-            window.radarChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: Object.keys(data),
-                    datasets: [{
-                        label: '财务指标',
-                        data: Object.values(data),
-                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
-                        borderColor: 'rgba(102, 126, 234, 1)',
-                        borderWidth: 2,
-                        pointBackgroundColor: 'rgba(102, 126, 234, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 1,
-                            ticks: {
-                                stepSize: 0.2
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 创建未来预测图表 - 按月显示，更精细
-        function createFuturePredictionChart(prediction) {
-            const ctx = document.getElementById('futurePredictionChart').getContext('2d');
-            
-            // 销毁旧图表
-            if (window.predictionChart) {
-                window.predictionChart.destroy();
-            }
-            
-            // 处理空数据
-            const predData = prediction || {};
-            const years = predData['预测年份'] || ['2027', '2028', '2029'];
-            
-            // 生成月度标签和数据
-            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-            let monthlyLabels = [];
-            let monthlyRevenue = [];
-            let monthlyProfit = [];
-            
-            years.forEach(year => {
-                const yearRevenue = predData[`${year}_月度营收`];
-                const yearProfit = predData[`${year}_月度利润`];
-                
-                if (yearRevenue && yearProfit) {
-                    yearRevenue.forEach((rev, idx) => {
-                        monthlyLabels.push(`${year}年${months[idx]}`);
-                        monthlyRevenue.push(rev);
-                        monthlyProfit.push(yearProfit[idx]);
-                    });
-                } else {
-                    // 如果没有月度数据，使用年度数据平均分配并添加波动
-                    const yearIdx = years.indexOf(year);
-                    const annualRevenue = predData['预测营业收入'] ? predData['预测营业收入'][yearIdx] : 100000;
-                    const annualProfit = predData['预测净利润'] ? predData['预测净利润'][yearIdx] : 10000;
-                    
-                    // 添加季节性波动
-                    const seasonalFactors = [0.85, 0.90, 1.05, 1.00, 1.02, 1.08, 0.95, 0.98, 1.10, 1.05, 1.15, 1.20];
-                    
-                    seasonalFactors.forEach((factor, idx) => {
-                        monthlyLabels.push(`${year}年${months[idx]}`);
-                        monthlyRevenue.push(annualRevenue / 12 * factor * (0.95 + Math.random() * 0.1));
-                        monthlyProfit.push(annualProfit / 12 * factor * (0.95 + Math.random() * 0.1));
-                    });
-                }
-            });
-            
-            window.predictionChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthlyLabels,
-                    datasets: [
-                        {
-                            label: '预测营业收入',
-                            data: monthlyRevenue,
-                            borderColor: 'rgba(102, 126, 234, 1)',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            tension: 0.3,
-                            fill: true,
-                            pointRadius: 2,
-                            pointHoverRadius: 5
-                        },
-                        {
-                            label: '预测净利润',
-                            data: monthlyProfit,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                            tension: 0.3,
-                            fill: true,
-                            pointRadius: 2,
-                            pointHoverRadius: 5
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: '金额 (万元)'
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 12
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: '未来3年经营状况预测（月度）',
-                            font: {
-                                size: 16
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('zh-CN', {
-                                            style: 'decimal',
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2
-                                        }).format(context.parsed.y) + ' 万元';
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
-                    }
-                }
-            });
-        }
-
-        // 导出PDF报告 - 使用html2canvas截图方式避免中文乱码
-        function exportToPDF() {
-            if (!analysisResult) {
-                showError('请先进行信用评估');
-                return;
-            }
-            
-            // 显示加载提示
-            const loadingDiv = document.createElement('div');
-            loadingDiv.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;color:white;font-size:18px;';
-            loadingDiv.innerHTML = '<div>正在生成PDF报告，请稍候...</div>';
-            document.body.appendChild(loadingDiv);
-            
-            // 延迟执行以确保UI更新
-            setTimeout(() => {
-                try {
-                    const element = document.getElementById('results');
-                    
-                    // 使用html2canvas捕获结果区域
-                    html2canvas(element, {
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        backgroundColor: '#ffffff',
-                        windowWidth: element.scrollWidth,
-                        windowHeight: element.scrollHeight
-                    }).then(canvas => {
-                        const imgData = canvas.toDataURL('image/png');
-                        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                        
-                        const imgWidth = 210;
-                        const pageHeight = 295;
-                        const imgHeight = canvas.height * imgWidth / canvas.width;
-                        let heightLeft = imgHeight;
-                        let position = 0;
-                        
-                        // 添加第一页
-                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                        heightLeft -= pageHeight;
-                        
-                        // 如果内容超过一页，添加更多页
-                        while (heightLeft >= 0) {
-                            position = heightLeft - imgHeight;
-                            pdf.addPage();
-                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                            heightLeft -= pageHeight;
-                        }
-                        
-                        pdf.save('企业信用评估报告.pdf');
-                        
-                        // 移除加载提示
-                        document.body.removeChild(loadingDiv);
-                    }).catch(err => {
-                        console.error('PDF生成失败:', err);
-                        showError('PDF生成失败: ' + err.message);
-                        document.body.removeChild(loadingDiv);
-                    });
-                } catch (err) {
-                    console.error('PDF生成失败:', err);
-                    showError('PDF生成失败: ' + err.message);
-                    document.body.removeChild(loadingDiv);
-                }
-            }, 100);
-        }
-
-        // 导出Excel数据
-        function exportToExcel() {
-            if (!analysisResult) {
-                showError('请先进行信用评估');
-                return;
-            }
-            
-            // 创建Excel内容
-            let csvContent = "公司名称,行业分类,评估日期,信用评分,信用等级\n";
-            csvContent += analysisResult['基本信息']['公司名称'] + ",";
-            csvContent += analysisResult['基本信息']['行业分类'] + ",";
-            csvContent += analysisResult['基本信息']['评估日期'] + ",";
-            csvContent += analysisResult['信用评估']['信用评分'] + ",";
-            csvContent += analysisResult['信用评估']['信用等级'] + "\n";
-            
-            // 添加建议措施
-            csvContent += "\n建议措施\n";
-            analysisResult['建议措施'].forEach(rec => {
-                csvContent += "\"" + rec + "\"\n";
-            });
-            
-            // 下载CSV
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', '企业信用评估数据.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // 页面加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('企业信用评估模型加载完成');
+      function showResult(result, note, pending = '待计算') {
+        byId('score').textContent = result ? points(result.score) : '—';
+        byId('grade').textContent = result ? result.grade : pending;
+        byId('grade').classList.toggle('pending', !result);
+        byId('score-note').textContent = note;
+        byId('score-announce').textContent = result ? `${note} 教学得分 ${points(result.score)}，等级 ${result.grade}。` : '';
+        views.forEach(({ value, pointLabel, equation, meter }, index) => {
+          const rule = rules[index];
+          const item = result ? result.items[index] : null;
+          pointLabel.textContent = item ? `${points(item.subscore)} / ${rule.weight} 分` : `权重 ${rule.weight}%`;
+          value.textContent = item ? ` ${ratioText(item.ratio, rule)}` : '';
+          equation.hidden = meter.hidden = !item;
+          if (item) {
+            const top = amountFormat.format(item.numerator / 100);
+            const bottom = amountFormat.format(item.denominator / 100);
+            equation.textContent = `${top} ÷ ${bottom}${rule.unit === 'percent' ? ' × 100%' : ''} ≈ ${ratioText(item.ratio, rule)}`;
+            meter.value = item.subscore / 100;
+          } else {
+            equation.textContent = '';
+          }
         });
-    </script>
+      }
+
+      function fieldError(field, message) {
+        byId(`${field.id}-error`).textContent = message;
+        if (message) field.setAttribute('aria-invalid', 'true');
+        else field.removeAttribute('aria-invalid');
+      }
+
+      function formStatus(message = '', state = '') {
+        const status = byId('form-status');
+        status.textContent = message;
+        status.dataset.state = state;
+      }
+
+      function readAmounts() {
+        const cents = {};
+        fields.forEach((field) => {
+          const text = field.value.trim();
+          const matched = /^(-?)(?:(\d+)(?:\.(\d{0,2}))?|\.(\d{1,2}))$/.exec(text);
+          const minimum = Number(field.dataset.min ?? 0);
+          let error = '';
+          if (!text) error = '请填写金额。';
+          else if (!matched) error = '请输入数字，最多两位小数，不用千位分隔符。';
+          else {
+            const [, sign, whole = '0', trailing, leading] = matched;
+            const value = Number(`${sign}${whole}${(trailing ?? leading ?? '').padEnd(2, '0')}`);
+            if (minimum === 1 && value <= 0) error = '必须大于 0；这里是比率的分母。';
+            else if (value < minimum || value > maxCents) {
+              error = `请输入 ${amountFormat.format(minimum / 100)} 至 ${amountFormat.format(maxCents / 100)} 万元。`;
+            } else cents[field.id] = value;
+          }
+          fieldError(field, error);
+        });
+        subsetChecks.forEach(([part, total, totalName]) => {
+          if (cents[part] > cents[total]) fieldError(byId(part), `不能大于${totalName}。`);
+        });
+        const firstInvalid = form.querySelector('[aria-invalid="true"]');
+        if (firstInvalid) {
+          showResult(null, '输入有误，不计算总分或等级。', '待修正');
+          formStatus('请修正标记的金额后再计算。已保留当前输入。', 'error');
+          firstInvalid.focus();
+          return null;
+        }
+        return cents;
+      }
+
+      const hasEdits = () => fields.some((field, index) => field.value !== baseline[index]);
+      function updateSource() {
+        const unchanged = loaded && !hasEdits();
+        byId('source').textContent = unchanged ? `合成示例：${loaded.name}` : loaded ? `以「${loaded.name}」为基础的自定义输入` : hasEdits() ? '自定义输入（仅用虚构数字）' : '尚未载入示例，也可自行填写虚构数字。';
+        return unchanged ? `合成示例：${loaded.name}。` : '按当前自定义输入计算。';
+      }
+
+      function recalculate() {
+        const cents = readAmounts();
+        if (!cents) return false;
+        showResult(evaluate(cents), updateSource());
+        formStatus();
+        byId('calculate').textContent = '重新计算';
+        return true;
+      }
+
+      function closeConfirmation() {
+        const previous = pendingButton;
+        byId('replacement').hidden = true;
+        pendingButton = null;
+        return previous;
+      }
+
+      function loadExample(example) {
+        loaded = example;
+        fields.forEach((field) => { field.value = example.amounts[field.id]; });
+        baseline = fields.map((field) => field.value);
+        recalculate();
+        formStatus(`已载入「${example.name}」并计算分数，可以修改金额后重新计算。`);
+      }
+
+      exampleButtons.forEach((button) => {
+        const example = examples[button.dataset.example];
+        const cents = Object.fromEntries(Object.entries(example.amounts).map(([key, value]) => [key, Math.round(value * 100)]));
+        const preview = evaluate(cents);
+        button.querySelector('.preview').textContent = `教学示例：${points(preview.score)} 分 ${preview.grade}`;
+        button.addEventListener('click', () => {
+          if (hasEdits()) {
+            pendingButton = button;
+            byId('replacement-message').textContent = `载入「${example.name}」会替换你填写的数字。是否替换？`;
+            byId('replacement').hidden = false;
+            byId('keep-inputs').focus();
+          } else {
+            closeConfirmation();
+            loadExample(example);
+          }
+        });
+        button.disabled = false;
+      });
+      byId('keep-inputs').addEventListener('click', () => closeConfirmation()?.focus());
+      byId('replace-inputs').addEventListener('click', () => {
+        const button = closeConfirmation();
+        if (button) {
+          loadExample(examples[button.dataset.example]);
+          button.focus();
+        }
+      });
+      form.addEventListener('input', (event) => {
+        closeConfirmation();
+        fieldError(event.target, '');
+        subsetChecks.forEach(([part, total]) => {
+          if (event.target.id === total && byId(`${part}-error`).textContent.startsWith('不能大于')) fieldError(byId(part), '');
+        });
+        updateSource();
+        formStatus('输入已变更，请计算以更新结果。');
+        showResult(null, '分数已清除；计算后查看这次输入的结果。', '待计算');
+      });
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        closeConfirmation();
+        if (recalculate() && matchMedia('(max-width: 50rem)').matches) byId('results-title').focus();
+      });
+      showResult(null, '加载示例或填写金额后计算，下面可查看每项规则。');
+      byId('calculate').disabled = false;
+    })();
+  </script>
 </body>
 </html>
