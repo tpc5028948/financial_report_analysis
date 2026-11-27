@@ -37,7 +37,7 @@ jobs:
         shell: bash
         run: |
           install -d _site/frontend
-          install -m 644 index.html portfolio.html portfolio_single.html _site/
+          install -m 644 index.html table-import.js portfolio.html portfolio_single.html _site/
           install -m 644 frontend/index.html _site/frontend/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

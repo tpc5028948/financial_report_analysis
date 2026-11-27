@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; script-src 'self' file: 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'">
   <title>企业信用评估 Demo | 财务比率练习</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%23172f4f'/%3E%3Cpath d='M8 24V16h4v8zm6 0V12h4v12zm6 0V8h4v16z' fill='%239ce2c9'/%3E%3C/svg%3E">
   <style>
@@ -107,6 +107,30 @@
       .fields { gap: .65rem; }
       .example { padding: .65rem; }
     }
+    .import-panel { margin-bottom: 1.15rem; border-inline-start: 4px solid var(--green); }
+    .report-panel { margin-top: 1.15rem; }
+    .import-controls { display: flex; flex-wrap: wrap; gap: .65rem; align-items: end; margin: .85rem 0 .45rem; }
+    .import-controls label { font-size: .84rem; display: grid; gap: .2rem; min-width: 0; }
+    .import-controls select { max-width: min(19rem, 72vw); min-height: 2.75rem; background: #fff; border: 1px solid #8b9b9e; border-radius: .35rem; color: var(--ink); font: inherit; padding: .25rem .5rem; }
+    #import-status { min-height: 1.5rem; overflow-wrap: anywhere; }
+    #import-status[data-state="error"] { color: var(--error); }
+    .data-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: .9rem; margin-top: .6rem; }
+    .data-table th, .data-table td { padding: .5rem .45rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    .data-table thead th { background: var(--paper); }
+    .data-table [data-number] { text-align: right; }
+    .report-meta { margin: .35rem 0 .75rem; color: var(--muted); overflow-wrap: anywhere; }
+    .report-body h3 { margin-top: 1rem; font-size: 1rem; }
+    .report-body p { margin-top: .45rem; }
+    .report-body ul { padding-inline-start: 1.15rem; }
+    .quality-note { margin: .55rem 0; padding-inline-start: 1.15rem; font-size: .83rem; color: var(--muted); }
+    .import-detail { padding: .5rem 0 0; margin-top: .5rem; }
+    @media print {
+      body { background: #fff; color: #111; }
+      .masthead, main.wrap > :not(#report-panel), #report-panel > .actions { display: none !important; }
+      main.wrap, #report-panel { width: 100%; margin: 0; padding: 0; border: 0; overflow: visible; }
+      .report-body .data-table tr { break-inside: avoid; }
+      .report-body h2,.report-body h3 { break-after: avoid; }
+    }
   </style>
 </head>
 <body>
@@ -119,8 +143,8 @@
   <main class="wrap">
     <section class="hero" aria-labelledby="main-title">
       <div>
-        <h1 id="main-title">用四个财务比率试算信用等级</h1>
-        <p class="intro">一键载入示例，或修改金额后重新计算。对比流动性、负债、利润和现金流如何影响总分。</p>
+        <h1 id="main-title">导入财务表格，生成信用分析报告</h1>
+        <p class="intro">识别关键财务指标、核对来源和计算过程，再导出报告。没有表格也可以先试两个示例。</p>
       </div>
       <div class="examples">
         <h2>一键加载合成示例</h2>
@@ -145,7 +169,28 @@
         </div>
       </div>
     </section>
-    <noscript><p class="panel pad">请启用 JavaScript 以在浏览器内计算。无需联网或安装其他组件。</p></noscript>
+    <noscript><p class="panel pad">请启用 JavaScript 以在浏览器内读取表格和计算。无需联网或安装其他组件。</p></noscript>
+    <section class="panel pad import-panel" id="import-panel" aria-labelledby="import-title">
+      <h2 id="import-title">导入 Excel 或 CSV</h2>
+      <p class="eyeline">选择一份表格，先核对工作表、字段与原表单位，再应用并分析。文件不会离开浏览器。</p>
+      <div class="actions">
+        <button type="button" class="action primary" id="import-pick" disabled>选择表格</button>
+        <input id="import-file" type="file" accept=".xlsx,.csv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden aria-label="选择 Excel 或 CSV 表格">
+        <button type="button" class="action" id="template-csv" disabled>下载示例模板</button>
+      </div>
+      <p id="import-status" class="eyeline" role="status">尚未导入表格。</p>
+      <div class="import-detail" id="import-detail" hidden>
+        <div class="import-controls">
+          <label for="import-sheet">工作表<select id="import-sheet"></select></label>
+          <label for="import-unit">表格金额单位<select id="import-unit"><option value="">请选择</option><option value="元">元</option><option value="万元">万元</option><option value="亿元">亿元</option></select></label>
+          <button type="button" class="action primary" id="import-apply" disabled>应用数据并分析</button>
+        </div>
+        <p class="eyeline" id="import-meta"></p>
+        <table class="data-table" aria-label="识别到的财务指标"><thead><tr><th scope="col">指标</th><th scope="col" data-number>原表值</th><th scope="col">来源</th></tr></thead><tbody id="import-fields"></tbody></table>
+        <ul id="import-warnings" class="quality-note" hidden></ul>
+        <p class="eyeline">应用会替换当前表单，金额统一换算为万元并保留两位小数。缺失项留空，不用旧数据补齐。</p>
+      </div>
+    </section>
     <div class="workspace">
       <section class="panel pad" id="inputs" aria-labelledby="inputs-title">
         <h2 id="inputs-title">1. 调整财务数字</h2>
@@ -172,6 +217,7 @@
           <div class="actions">
             <button id="calculate" class="action primary" type="submit" disabled>计算分数</button>
             <a class="result-link" href="#results">查看评分与规则</a>
+            <a class="result-link" href="#report-panel" id="jump-report" hidden>查看分析报告</a>
           </div>
           <p id="form-status" class="muted form-status" role="status"></p>
         </form>
@@ -197,6 +243,24 @@
         </div>
       </section>
     </div>
+    <section class="panel pad report-panel" id="report-panel" hidden aria-labelledby="report-title">
+      <article class="report-body" id="report-body">
+        <h2 id="report-title">企业信用分析报告</h2>
+        <p class="report-meta" id="report-meta"></p>
+        <p id="report-summary"></p>
+        <h3>指标与评分依据</h3>
+        <table class="data-table" aria-label="报告评分明细"><thead><tr><th scope="col">财务指标</th><th scope="col">计算依据</th><th scope="col" data-number>比率</th><th scope="col" data-number>得分</th></tr></thead><tbody id="report-ratios"></tbody></table>
+        <h3>值得核对的指标</h3><ul id="report-focus"></ul>
+        <h3>输入与来源</h3>
+        <table class="data-table" aria-label="报告输入来源"><thead><tr><th scope="col">输入项目</th><th scope="col" data-number>万元</th><th scope="col">来源</th></tr></thead><tbody id="report-data"></tbody></table>
+        <p class="eyeline">金额按当前表单计算；权重和阈值为演示设定，不构成实际授信、评级或投资建议。</p>
+      </article>
+      <div class="actions" aria-label="报告导出">
+        <button type="button" class="action primary" id="print-report">打印 / 保存 PDF</button>
+        <button type="button" class="action" id="download-report">下载 HTML 报告</button>
+        <button type="button" class="action" id="download-csv">下载 CSV 明细</button>
+      </div>
+    </section>
     <footer class="muted">
       <strong>规则演示，不是正式评级。</strong> 数据仅在浏览器内计算，不上传或保存。
       <a id="portfolio-back" class="result-link" href="https://tpc5028948.github.io/InsightAI/">返回 AI 产品作品集</a>
@@ -214,6 +278,7 @@
       <p class="metric-range"></p>
     </li>
   </template>
+  <script src="./table-import.js"></script>
   <script>
     (() => {
       'use strict';
@@ -241,27 +306,41 @@
         pressure: { name: '现金承压', amounts: { assets: 4500, debt: 3000, 'current-assets': 1250, 'current-debt': 1000, revenue: 5000, profit: 300, cash: -150 } }
       };
       const subsetChecks = [['current-assets', 'assets', '总资产'], ['current-debt', 'debt', '总负债']];
+      const fieldNames = { assets:'总资产', debt:'总负债', 'current-assets':'流动资产', 'current-debt':'流动负债', revenue:'营业收入', profit:'净利润', cash:'经营现金流' };
+      const units = { '元':0.0001, '万元':1, '亿元':10000 };
+      const metricChecks = [
+        '核对短期负债到期安排，以及流动资产里应收账款与存货的可变现性。',
+        '核对负债期限、担保和资产质量；单期资产负债率不足以解释偿债压力。',
+        '结合收入结构和非经常性损益，确认净利润变化是否来自主营业务。',
+        '结合应收、预收和存货变动，核对利润转化为经营现金流的情况。'
+      ];
       let loaded = null;
       let baseline = fields.map(() => '');
       let pendingButton = null;
+      let currentReport = null;
+      let workbook = null;
+      let candidate = null;
+      let importVersion = 0;
 
       const ratioText = (value, rule) => fixed(rule.unit === 'times' ? value / 100 : value) + (rule.unit === 'times' ? ' 倍' : '%');
       const gradeFor = (hundredths) => grades.find(([, minimum]) => hundredths >= minimum * 100)[0];
 
       // Inputs are integer hundredths of a 万元; ratio thresholds are scaled by 100.
       // Keep the arithmetic exact until display. Validated input bounds keep products below MAX_SAFE_INTEGER.
+      function evaluateMetric(rule, cents) {
+        const numerator = cents[rule.numerator];
+        const denominator = cents[rule.denominator];
+        if (!Number.isSafeInteger(numerator) || !Number.isSafeInteger(denominator) || denominator <= 0) return null;
+        const scaled = numerator * 100;
+        const delta = rule.full - rule.zero;
+        const span = Math.abs(delta) * denominator;
+        const offset = (scaled - rule.zero * denominator) * Math.sign(delta);
+        const bounded = Math.max(0, Math.min(span, offset));
+        const subscore = Math.floor((2 * rule.weight * 100 * bounded + span) / (2 * span));
+        return { numerator, denominator, ratio: scaled / denominator, subscore };
+      }
       function evaluate(cents) {
-        const items = rules.map((rule) => {
-          const numerator = cents[rule.numerator];
-          const denominator = cents[rule.denominator];
-          const scaled = numerator * 100;
-          const delta = rule.full - rule.zero;
-          const span = Math.abs(delta) * denominator;
-          const offset = (scaled - rule.zero * denominator) * Math.sign(delta);
-          const bounded = Math.max(0, Math.min(span, offset));
-          const subscore = Math.floor((2 * rule.weight * 100 * bounded + span) / (2 * span));
-          return { numerator, denominator, ratio: scaled / denominator, subscore };
-        });
+        const items = rules.map(rule => evaluateMetric(rule, cents));
         const score = items.reduce((sum, item) => sum + item.subscore, 0);
         return { items, score, grade: gradeFor(score) };
       }
@@ -288,6 +367,10 @@
       });
 
       function showResult(result, note, pending = '待计算') {
+        if (!result) {
+          currentReport = null;
+          byId('report-panel').hidden = byId('jump-report').hidden = true;
+        }
         byId('score').textContent = result ? points(result.score) : '—';
         byId('grade').textContent = result ? result.grade : pending;
         byId('grade').classList.toggle('pending', !result);
@@ -309,6 +392,179 @@
           }
         });
       }
+
+      function textRows(container, rows, numeric = []) {
+        const fragment = document.createDocumentFragment();
+        rows.forEach((values) => {
+          const tr = document.createElement('tr');
+          values.forEach((value, index) => {
+            const td = document.createElement('td');
+            if (numeric.includes(index)) td.setAttribute('data-number', '');
+            td.textContent = String(value ?? '—');
+            tr.append(td);
+          });
+          fragment.append(tr);
+        });
+        byId(container).replaceChildren(fragment);
+      }
+      function textList(container, items) {
+        byId(container).replaceChildren(...items.map((item) => {
+          const li = document.createElement('li');
+          li.textContent = item;
+          return li;
+        }));
+      }
+      function renderReport(cents, result) {
+        const items = result?.items ?? rules.map(rule => evaluateMetric(rule, cents));
+        const metadata = [loaded?.company || (loaded?.amounts ? `示例企业 · ${loaded.name}` : '未填写企业名称'), loaded?.period || '未填写报告期'];
+        if (loaded?.sheet) metadata.push(`工作表：${loaded.sheet}`);
+        if (loaded && hasEdits()) metadata.push('含手动调整');
+        metadata.push(new Date().toLocaleDateString('zh-CN'));
+        byId('report-meta').textContent = metadata.join(' ｜ ');
+        const calculated = items.filter(Boolean).length;
+        const summary = result
+          ? `演示总分 ${points(result.score)} / 100，等级 ${result.grade}。已计算 ${calculated} 项指标。`
+          : `数据核验报告：已核对 ${Object.keys(cents).length} / 7 项输入，可计算 ${calculated} / 4 项比率。缺少完整数据，不生成总分或等级。`;
+        byId('report-summary').textContent = summary;
+        const metricRows = rules.map((rule, i) => {
+          const item = items[i];
+          return [rule.name, rule.formula, item ? ratioText(item.ratio, rule) : '字段不足', item ? `${points(item.subscore)} / ${rule.weight}` : '—'];
+        });
+        const inputRows = fields.map((field, index) => {
+          const known = Object.hasOwn(cents, field.id);
+          const same = field.value === baseline[index];
+          const origin = !known ? '缺失' : !same || !loaded ? '手动录入' : loaded.sources?.[field.id] || (loaded.amounts ? '示例' : '工作表');
+          return [fieldNames[field.id], known ? points(cents[field.id]) : '—', origin];
+        });
+        const findings = [];
+        rules.forEach((rule, i) => {
+          const item = items[i];
+          if (item && item.subscore < rule.weight * 60) findings.push(`${rule.name}：${ratioText(item.ratio, rule)}。${metricChecks[i]}`);
+        });
+        if (!result) findings.push('补齐报告所列的缺失字段，再重新计算总分。缺失值没有被当成 0。');
+        if (!findings.length) findings.push('按本演示的关注阈值，无需要单列的指标；这不代表没有实际信用风险。');
+        textRows('report-ratios', metricRows, [2,3]);
+        textRows('report-data', inputRows, [1]);
+        textList('report-focus', findings);
+        currentReport = { metadata, summary, metricRows, inputRows, findings };
+        byId('report-panel').hidden = byId('jump-report').hidden = false;
+      }
+      function download(name, mime, text) {
+        const url = URL.createObjectURL(new Blob([text], { type:mime }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = name;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 2000);
+      }
+      function makeCsv(rows) {
+        const cell = (value) => {
+          let s = String(value ?? '');
+          if (/^\s*[=+\-@]/.test(s) && !/^-?\d+(?:\.\d+)?$/.test(s)) s = "'" + s;
+          return '"' + s.replaceAll('"', '""') + '"';
+        };
+        return '﻿' + rows.map(row => row.map(cell).join(',')).join('\r\n');
+      }
+      byId('template-csv').addEventListener('click', () => {
+        download('财务指标导入模板.csv', 'text/csv;charset=utf-8', makeCsv([
+          ['公司名称','报告期','金额单位','总资产','总负债','流动资产','流动负债','营业收入','净利润','经营活动产生的现金流量净额'],
+          ['稳健经营示例企业','2025年度','万元',4500,2100,1800,1000,5000,600,650]
+        ]));
+      });
+      byId('template-csv').disabled = false;
+      byId('print-report').addEventListener('click', () => { if (currentReport) window.print(); });
+      byId('download-report').addEventListener('click', () => {
+        if (!currentReport) return;
+        const style = 'body{font:16px/1.6 system-ui,sans-serif;color:#172f4f;margin:32px auto;padding:0 16px;max-width:900px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #d6dedb;padding:8px;text-align:left;overflow-wrap:anywhere}th{background:#f6f7f4}.eyeline,.report-meta{color:#485a6c}p{overflow-wrap:anywhere}h2,h3{break-after:avoid}tr{break-inside:avoid}';
+        download('企业信用分析报告.html', 'text/html;charset=utf-8', '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src \'none\';style-src \'unsafe-inline\'"><title>企业信用分析报告</title><style>' + style + '</style><body>' + byId('report-body').outerHTML + '</body></html>');
+      });
+      byId('download-csv').addEventListener('click', () => {
+        if (!currentReport) return;
+        const r = currentReport;
+        download('企业信用分析明细.csv', 'text/csv;charset=utf-8', makeCsv([[r.metadata.join(' ｜ ')],[r.summary],[],['指标','公式','比率','得分'],...r.metricRows,[],['输入','万元','来源'],...r.inputRows,[],['关注项'],...r.findings.map(i=>[i])]));
+      });
+      function importStatus(text, state = '') {
+        byId('import-status').dataset.state = state;
+        byId('import-status').textContent = text;
+      }
+      function checkImportReady() {
+        const unit = byId('import-unit').value;
+        byId('import-apply').disabled = !candidate || !Object.hasOwn(units, unit) || !fields.some(f => Number.isFinite(candidate.values?.[f.id]));
+      }
+      function showSheet() {
+        candidate = null;
+        checkImportReady();
+        const sheet = workbook?.sheets?.[Number(byId('import-sheet').value)];
+        if (!sheet) return;
+        try {
+          candidate = window.CreditTableImport.analyze(sheet);
+          byId('import-unit').value = Object.hasOwn(units,candidate.unitHint) ? candidate.unitHint : '';
+          const meta = [candidate.meta?.company, candidate.meta?.period].filter(Boolean);
+          byId('import-meta').textContent = meta.length ? meta.join(' ｜ ') : '未找到公司名称或报告期，按当前工作表分析。';
+          const count = fields.filter(f => Number.isFinite(candidate.values?.[f.id])).length;
+          textRows('import-fields', fields.map(f => [fieldNames[f.id], Number.isFinite(candidate.values?.[f.id]) ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:8}).format(candidate.values[f.id]) : '未识别', candidate.sources?.[f.id] || '—']), [1]);
+          const notes = (candidate.warnings || []).slice(0,8);
+          textList('import-warnings', notes);
+          byId('import-warnings').hidden = notes.length===0;
+          importStatus(count ? `识别到 ${count} / 7 项财务指标，请核对原表单位后应用。` : '未识别到财务指标，可切换工作表或下载模板重试。', count?'':'error');
+          checkImportReady();
+        } catch (error) {
+          candidate = null;
+          textRows('import-fields',[]);
+          textList('import-warnings',[]);
+          byId('import-meta').textContent = '';
+          importStatus(error?.message || '该工作表无法识别，请换一张。','error');
+        }
+      }
+      const fileInput = byId('import-file');
+      byId('import-pick').addEventListener('click', () => fileInput.click());
+      byId('import-sheet').addEventListener('change', showSheet);
+      byId('import-unit').addEventListener('change', checkImportReady);
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        fileInput.value = '';
+        const token = ++importVersion;
+        workbook = null;
+        candidate = null;
+        checkImportReady();
+        byId('import-detail').hidden = true;
+        byId('import-panel').setAttribute('aria-busy','true');
+        importStatus('正在本地读取表格…');
+        try {
+          const data = await window.CreditTableImport.read(file);
+          if (token!==importVersion) return;
+          if (!data?.sheets?.length) throw new Error('文件中没有可读取的工作表。');
+          workbook = data;
+          const choices = byId('import-sheet');
+          choices.replaceChildren(...data.sheets.map((sheet,i) => {
+            const option=document.createElement('option'); option.value=i; option.textContent=sheet.name || `工作表 ${i+1}`; return option;
+          }));
+          byId('import-detail').hidden = false;
+          showSheet();
+        } catch (error) {
+          if (token===importVersion) importStatus(error?.message || '无法读取该文件，请使用 Excel .xlsx 或 CSV。','error');
+        } finally {
+          if (token===importVersion) byId('import-panel').removeAttribute('aria-busy');
+        }
+      });
+      byId('import-apply').addEventListener('click', () => {
+        const unit=byId('import-unit').value;
+        const factor=units[unit];
+        if (!candidate || !factor || byId('import-apply').disabled) return;
+        closeConfirmation();
+        loaded={type:'sheet',sheet:workbook.sheets[Number(byId('import-sheet').value)].name,company:candidate.meta?.company,period:candidate.meta?.period,sources:candidate.sources};
+        fields.forEach((f) => { const n=candidate.values?.[f.id]; f.value=Number.isFinite(n)?(n*factor).toFixed(2):''; });
+        baseline=fields.map(f=>f.value);
+        const done=recalculate();
+        if (done) formStatus('已应用表格并生成报告。你可以调整字段后重新计算。');
+        importStatus(done ? '导入完成：评分和报告已更新。' : currentReport ? '已生成数据核验报告；字段不全，暂不评级。' : '已导入，请查看并修正表单提示。');
+        if (done) byId('results-title').focus();
+      });
+      if (window.CreditTableImport) byId('import-pick').disabled = false;
+      else importStatus('表格解析组件未加载。可以先使用示例或手动录入。','error');
 
       function fieldError(field, message) {
         byId(`${field.id}-error`).textContent = message;
@@ -346,8 +602,11 @@
         });
         const firstInvalid = form.querySelector('[aria-invalid="true"]');
         if (firstInvalid) {
-          showResult(null, '输入有误，不计算总分或等级。', '待修正');
-          formStatus('请修正标记的金额后再计算。已保留当前输入。', 'error');
+          const nonemptyInvalid = fields.some(field => field.getAttribute('aria-invalid') === 'true' && field.value.trim() !== '');
+          const partial = loaded?.type === 'sheet' && !nonemptyInvalid && Object.keys(cents).length > 0;
+          showResult(null, partial ? '表格缺少部分字段，暂不评级；可查看数据核验报告。' : '输入有误，不计算总分或等级。', partial ? '字段未齐' : '待修正');
+          if (partial) renderReport(cents, null);
+          formStatus(partial ? '请补齐标记字段后重新计算，也可先查看数据核验报告。' : '请修正标记的金额后再计算。已保留当前输入。', 'error');
           firstInvalid.focus();
           return null;
         }
@@ -356,15 +615,24 @@
 
       const hasEdits = () => fields.some((field, index) => field.value !== baseline[index]);
       function updateSource() {
-        const unchanged = loaded && !hasEdits();
-        byId('source').textContent = unchanged ? `合成示例：${loaded.name}` : loaded ? `以「${loaded.name}」为基础的自定义输入` : hasEdits() ? '自定义输入（仅用虚构数字）' : '尚未载入示例，也可自行填写虚构数字。';
+        const edited = hasEdits();
+        if (loaded?.type === 'sheet') {
+          const source = `已导入工作表：${loaded.sheet}${edited ? '（含手动调整）' : ''}`;
+          byId('source').textContent = source;
+          return source;
+        }
+        const unchanged = loaded && !edited;
+        byId('source').textContent = unchanged ? `合成示例：${loaded.name}` : loaded ? `以「${loaded.name}」为基础的自定义输入` : edited ? '自定义输入' : '尚未载入示例，也可自行填写演示数字。';
         return unchanged ? `合成示例：${loaded.name}。` : '按当前自定义输入计算。';
       }
 
       function recalculate() {
+        const source = updateSource();
         const cents = readAmounts();
         if (!cents) return false;
-        showResult(evaluate(cents), updateSource());
+        const result = evaluate(cents);
+        showResult(result, source);
+        renderReport(cents, result);
         formStatus();
         byId('calculate').textContent = '重新计算';
         return true;
